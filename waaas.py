@@ -49,6 +49,9 @@ def handle_action(line):
         list(map(create_damage, action_search.group(2)[14:].split(', ')))
     elif action_search.group(2) == "Sudden Death":
       res["suddenDeath"] = action_search.group(1)
+    # todo could be something else when the it's not the last round
+    elif action_search.group(2) == "Game Ends - Round Finished":
+      res["gameEnd"] = action_search.group(1)
     return
   message_search = re.compile(f"\[({timestamp_regex})\] \[(.+)\] (.+)$").search(line)
   if message_search:
