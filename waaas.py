@@ -1,15 +1,20 @@
 import re
 
 res = {}
+timestamp_regex = "^\[(?:\d\d:){2}\d\d\.\d\d\] "
+action_prefix = " "  # some weird ISO-8859-1 encoded strings
 
 
 def handle_action(line):
-  pass
+  if re.compile(timestamp_regex + action_prefix).search(line):
+    print('action', line)
+  else:
+    print('message', line)
 
 
-with open("game.log", encoding="utf8", errors='ignore') as f:
+with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
   for l in f.readlines():
-    if re.search("^\[(?:\d\d:){2}\d\d\.\d\d\] ", l):
+    if re.search(timestamp_regex, l):
       handle_action(l)
     elif l.startswith("Game ID: "):
       res["gameId"] = re.compile("Game ID: \"(\d+)\"").search(l).group(1)
