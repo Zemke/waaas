@@ -32,12 +32,13 @@ def handle_action(line):
         "weapons": [],
         "damages": [],
       }
-    elif "ends turn" in line:
+    elif "ends turn" in line or "loses turn due to loss of control" in line:
       ends_turn_search = re\
-        .compile("ends turn; time used: ([\d.]+) sec turn, ([\d.]+) sec retreat$") \
+        .compile("; time used: ([\d.]+) sec turn, ([\d.]+) sec retreat$") \
         .search(action_search.group(2))
       turn["curr"]["timeUsedSeconds"] = float(ends_turn_search.group(1))
       turn["curr"]["retreatSeconds"] = float(ends_turn_search.group(2))
+      turn["curr"]["lossOfControl"] = "loses turn due to loss of control" in line
       res["turns"].append(turn["curr"])
       turn["curr"] = None
     elif "fires" in line or "uses" in line:
