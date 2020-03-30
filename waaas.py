@@ -1,20 +1,21 @@
 import pprint
 import re
 
-res = {"messages": []}
+res = {"messages": [], "turns": []}
 timestamp_regex = "(?:\d\d:){2}\d\d\.\d\d"
 timestamp_regex_w_brackets = "^\[%s\]" % timestamp_regex
 action_prefix = " "  # some weird ISO-8859-1 encoded chars
 
+action = []
+
 
 def handle_action(line):
-  if re.compile(f"{timestamp_regex_w_brackets} {action_prefix}").search(line):
-    print('action', line)
+  action_search = re.compile(f"{timestamp_regex_w_brackets} {action_prefix}(.*)$").search(line)
+  if action_search:
+    action.append(action_search.group(1))
     return
-  
   message_search = re.compile(f"\[({timestamp_regex})\] \[(.+)\] (.+)$").search(line)
   if message_search:
-    print('message', line)
     res["messages"].append({
       "timestamp": message_search.group(1),
       "user": message_search.group(2),
@@ -40,3 +41,4 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
       res["fileFormatVersion"] = [file_format_groups.group(1), file_format_groups.group(2)]
 
 pprint.pprint(res)
+pprint.pprint(action)
