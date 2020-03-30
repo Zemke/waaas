@@ -52,6 +52,13 @@ def handle_action(line):
     # todo could be something else when the it's not the last round
     elif action_search.group(2) == "Game Ends - Round Finished":
       res["gameEnd"] = action_search.group(1)
+    else:
+      pass
+      # print("unprocessed", line)
+      # current unprocessed are/
+      # unprocessed [00:13:23.56]  Men of faith (NNN`Rafka) used 30 (12) units of Jet Pack fuel
+      # unprocessed [00:15:13.24]  mloda kadra (Siwy) used 30 units of Jet Pack fuel
+      # unprocessed [00:20:03.32]  resetting Jet Pack fuel use to 0
     return
   message_search = re.compile(f"\[({timestamp_regex})\] \[(.+)\] (.+)$").search(line)
   if message_search:
