@@ -2,7 +2,7 @@ import pprint
 import re
 from typing import Dict, Optional, Any
 
-res: Dict[str, Any] = {"messages": [], "turns": []}
+res: Dict[str, Any] = {"messages": [], "turns": [], "suddenDeath": None}
 timestamp_regex = "(?:\d\d:){2}\d\d\.\d\d"
 timestamp_regex_w_brackets = "^\[%s\]" % timestamp_regex
 action_prefix = " "  # some weird ISO-8859-1 encoded chars
@@ -47,6 +47,8 @@ def handle_action(line):
     elif action_search.group(2).startswith("Damage dealt"):
       res["turns"][-1:][0]["damages"] = \
         list(map(create_damage, action_search.group(2)[14:].split(', ')))
+    elif action_search.group(2) == "Sudden Death":
+      res["suddenDeath"] = action_search.group(1)
     return
   message_search = re.compile(f"\[({timestamp_regex})\] \[(.+)\] (.+)$").search(line)
   if message_search:
