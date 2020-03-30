@@ -10,24 +10,42 @@ action_prefix = " "  # some weird ISO-8859-1 encoded chars
 turn: Dict[str, Optional[Dict]] = {"curr": None}
 
 
+def create_damage(action):
+  # Damage dealt: 28 (1 kill) to mloda kadra (Siwy), 64 to Men of faith (NNN`Rafka)
+  # ['159 to mloda kadra (Siwy)', '100 (1 kill) to Men of faith (NNN`Rafka)']
+  search = re.compile('^(\d+)(?: \((\d+) kills?\))? to .* \((.+)\)$').search(action)
+  return {
+    "damage": int(search.group(1)),
+    "kills": int(search.group(2) or 0),
+    "victim": search.group(3)
+  }
+
+
 def handle_action(line):
-  action_search = re.compile(f"\[({timestamp_regex})\] {action_prefix}(.*)$").search(line)
+  action_search = \
+    re.compile(f"\[({timestamp_regex})\] {action_prefix}(.*)$").search(line)
   if action_search:
     if "starts turn" in line:
       turn["curr"] = {
         "timestamp": action_search.group(1),
         "user": re.compile("\((.+\))").search(action_search.group(2)).group(1),
-        "weapons": []
+        "weapons": [],
+        "damages": [],
       }
     elif "ends turn" in line:
-      ends_turn_search = re.compile("ends turn; time used: ([\d.]+) sec turn, ([\d.]+) sec retreat$") \
+      ends_turn_search = re\
+        .compile("ends turn; time used: ([\d.]+) sec turn, ([\d.]+) sec retreat$") \
         .search(action_search.group(2))
-      turn["curr"]["timeUsedSeconds"] = ends_turn_search.group(1)
-      turn["curr"]["retreatSeconds"] = ends_turn_search.group(2)
+      turn["curr"]["timeUsedSeconds"] = float(ends_turn_search.group(1))
+      turn["curr"]["retreatSeconds"] = float(ends_turn_search.group(2))
       res["turns"].append(turn["curr"])
       turn["curr"] = None
     elif "fires" in line or "uses" in line:
-      turn["curr"]["weapons"].append(re.compile("es (.*)$").search(action_search.group(2)).group(1))
+      turn["curr"]["weapons"]\
+        .append(re.compile("es (.*)$").search(action_search.group(2)).group(1))
+    elif action_search.group(2).startswith("Damage dealt"):
+      res["turns"][-1:][0]["damages"] = \
+        list(map(create_damage, action_search.group(2)[14:].split(', ')))
     return
   message_search = re.compile(f"\[({timestamp_regex})\] \[(.+)\] (.+)$").search(line)
   if message_search:
