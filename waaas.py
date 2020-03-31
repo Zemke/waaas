@@ -98,6 +98,8 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
         "worm": most_dmg_w_one_shot_search.group(2),
         "team": most_dmg_w_one_shot_search.group(3),
       }
+    elif " wins the round." in l:
+      res["winsTheRound"] = re.compile("(.+) wins the round\.").search(l).group(1)
     else:
       pass
       # l is not '\n' and print("Unprocessed", l)
@@ -110,7 +112,6 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
       # Unprocessed End of round 3
       # Unprocessed Round time: 0:34:37
       # Unprocessed Total game time elapsed: 0:34:37
-      # Unprocessed Men of faith wins the round.
       # Unprocessed Worm of the round: Michal (mloda kadra)
 
 pprint.pprint(res)
