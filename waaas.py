@@ -91,6 +91,13 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
         "user": spectator_search.group(1),
         "host": spectator_search.group(2) is not None
       })
+    elif l.startswith("Most damage with one shot"):
+      most_dmg_w_one_shot_search = re.compile("Most damage with one shot: (\d+) - (.+) \((.*)\)").search(l)
+      res["mostDamageWithOneShot"] = {
+        "damage": most_dmg_w_one_shot_search.group(1),
+        "worm": most_dmg_w_one_shot_search.group(2),
+        "team": most_dmg_w_one_shot_search.group(3),
+      }
     else:
       pass
       # l is not '\n' and print("Unprocessed", l)
@@ -105,6 +112,5 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
       # Unprocessed Total game time elapsed: 0:34:37
       # Unprocessed Men of faith wins the round.
       # Unprocessed Worm of the round: Michal (mloda kadra)
-      # Unprocessed Most damage with one shot: 259 - Adam (Men of faith)
 
 pprint.pprint(res)
