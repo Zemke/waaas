@@ -107,6 +107,8 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
         "worm": worm_of_the_round_search.group(1),
         "team": worm_of_the_round_search.group(2),
       }
+    elif l.startswith("Round time: "):
+      res["roundTime"] = re.compile("Round time: (.+)").search(l).group(1)
     else:
       pass
       # l is not '\n' and print("Unprocessed", l)
@@ -117,7 +119,6 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
       # Unprocessed mloda kadra (Siwy):       Turn: 00:09:02.62, Retreat: 00:00:59.70, Total: 00:10:02.32, Turn count: 25
       # Unprocessed Men of faith (NNN`Rafka): Turn: 00:14:04.06, Retreat: 00:01:16.04, Total: 00:15:20.10, Turn count: 26
       # Unprocessed End of round 3
-      # Unprocessed Round time: 0:34:37
       # Unprocessed Total game time elapsed: 0:34:37
 
 pprint.pprint(res)
