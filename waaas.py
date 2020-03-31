@@ -128,6 +128,7 @@ def perform():
           "total": team_time_totals_search.group(5),
           "turnCount": int(team_time_totals_search.group(6)),
         })
+  return res
 
 
 if __name__ == '__main__':
