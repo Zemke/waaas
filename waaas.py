@@ -12,8 +12,6 @@ turn: Dict[str, Optional[Dict]] = {"curr": None}
 team_time_totals_line_appeared = False
 
 def create_damage(action):
-  # Damage dealt: 28 (1 kill) to mloda kadra (Siwy), 64 to Men of faith (NNN`Rafka)
-  # ['159 to mloda kadra (Siwy)', '100 (1 kill) to Men of faith (NNN`Rafka)']
   search = re.compile('^(\d+)(?: \((\d+) kills?\))? to .* \((.+)\)$').search(action)
   return {
     "damage": int(search.group(1)),
@@ -50,16 +48,8 @@ def handle_action(line):
         list(map(create_damage, action_search.group(2)[14:].split(', ')))
     elif action_search.group(2) == "Sudden Death":
       res["suddenDeath"] = action_search.group(1)
-    # todo could be something else when the it's not the last round
-    elif action_search.group(2) == "Game Ends - Round Finished":
+    elif action_search.group(2).startswith("Game Ends"):
       res["gameEnd"] = action_search.group(1)
-    else:
-      pass
-      # print("unprocessed", line)
-      # current unprocessed are/
-      # unprocessed [00:13:23.56]  Men of faith (NNN`Rafka) used 30 (12) units of Jet Pack fuel
-      # unprocessed [00:15:13.24]  mloda kadra (Siwy) used 30 units of Jet Pack fuel
-      # unprocessed [00:20:03.32]  resetting Jet Pack fuel use to 0
     return
   message_search = re.compile(f"\[({timestamp_regex})\] \[(.+)\] (.+)$").search(line)
   if message_search:
@@ -104,7 +94,6 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
     elif " wins the round." in l:
       res["winsTheRound"] = re.compile("(.+) wins the round\.").search(l).group(1)
     elif l.startswith("Worm of the round: "):
-      # Unprocessed Worm of the round: Michal (mloda kadra)
       worm_of_the_round_search = re.compile("Worm of the round: (.+) \((.+)\)").search(l)
       res["wormOfTheRound"] = {
         "worm": worm_of_the_round_search.group(1),
@@ -136,11 +125,5 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
         "total": team_time_totals_search.group(5),
         "turnCount": int(team_time_totals_search.group(6)),
       })
-    else:
-      pass
-      # l is not '\n' and print("Unprocessed", l)
-      # current unprocessed are
-      # Unprocessed Team time totals:
-      # Unprocessed End of round 3
 
 pprint.pprint(res)
