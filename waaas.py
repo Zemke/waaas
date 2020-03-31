@@ -116,7 +116,8 @@ def perform():
         })
       elif l.startswith("Team time totals:"):
         team_time_totals_line_appeared["curr"] = True
-      elif team_time_totals_line_appeared["curr"] and "Turn count" in l and "Total" in l and "Retreat" in l and "Turn" in l:
+      elif (team_time_totals_line_appeared["curr"]
+            and "Turn count" in l and "Total" in l and "Retreat" in l and "Turn" in l):
         team_time_totals_search = re \
           .compile(' *(.+) \((.+)\): +Turn: ([\d:.]+), Retreat: ([\d:.]+), Total: ([\d:.]+), Turn count: (\d+)$') \
           .search(l)
