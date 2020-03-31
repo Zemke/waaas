@@ -100,6 +100,13 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
       }
     elif " wins the round." in l:
       res["winsTheRound"] = re.compile("(.+) wins the round\.").search(l).group(1)
+    elif l.startswith("Worm of the round: "):
+      # Unprocessed Worm of the round: Michal (mloda kadra)
+      worm_of_the_round_search = re.compile("Worm of the round: (.+) \((.+)\)").search(l)
+      res["wormOfTheRound"] = {
+        "worm": worm_of_the_round_search.group(1),
+        "team": worm_of_the_round_search.group(2),
+      }
     else:
       pass
       # l is not '\n' and print("Unprocessed", l)
@@ -112,6 +119,5 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
       # Unprocessed End of round 3
       # Unprocessed Round time: 0:34:37
       # Unprocessed Total game time elapsed: 0:34:37
-      # Unprocessed Worm of the round: Michal (mloda kadra)
 
 pprint.pprint(res)
