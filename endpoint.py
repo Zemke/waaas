@@ -12,6 +12,9 @@ urls = (
 
 class index:
   def POST(self):
+    x = web.input(replay={})
+    with open('game.WAgame', 'w+b') as f:
+      f.write(x['replay'].file.read())
     os.system('./perform')
     web.header('Content-Type', 'application/json')
     return json.dumps(perform())
