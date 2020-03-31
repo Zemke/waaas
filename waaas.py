@@ -86,6 +86,7 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
       file_format_groups = re.compile("File Format Version: (.+) - (.+)$").search(l)
       res["fileFormatVersion"] = [file_format_groups.group(1), file_format_groups.group(2)]
     else:
+      pass
       # l is not '\n' and print("Unprocessed", l)
       # current unprocessed are
       # Unprocessed Red:       "Siwy"      as "mloda kadra"
