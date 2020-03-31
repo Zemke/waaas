@@ -1,3 +1,4 @@
+scp ./game.WAgame zemke@192.168.178.65:~/play/game.WAgame
 ssh -t zemke@192.168.178.65 'echo "zemke" | sudo -Sv && cd ~/play && ./perform > game.log'
 scp zemke@192.168.178.65:~/play/game.log .
 
