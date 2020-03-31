@@ -1,4 +1,5 @@
 import json
+import os
 
 import web
 
@@ -11,6 +12,7 @@ urls = (
 
 class index:
   def POST(self):
+    os.system('./perform')
     web.header('Content-Type', 'application/json')
     return json.dumps(perform())
 
