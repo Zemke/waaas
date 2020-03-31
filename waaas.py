@@ -2,7 +2,7 @@ import pprint
 import re
 from typing import Dict, Optional, Any
 
-res: Dict[str, Any] = {"messages": [], "turns": [], "suddenDeath": None, "spectators": []}
+res: Dict[str, Any] = {"messages": [], "turns": [], "suddenDeath": None, "spectators": [], "teams": []}
 timestamp_regex = "(?:\d\d:){2}\d\d\.\d\d"
 timestamp_regex_w_brackets = "^\[%s\]" % timestamp_regex
 action_prefix = " "  # some weird ISO-8859-1 encoded chars
@@ -33,7 +33,7 @@ def handle_action(line):
         "damages": [],
       }
     elif "ends turn" in line or "loses turn due to loss of control" in line:
-      ends_turn_search = re\
+      ends_turn_search = re \
         .compile("; time used: ([\d.]+) sec turn, ([\d.]+) sec retreat$") \
         .search(action_search.group(2))
       turn["curr"]["timeUsedSeconds"] = float(ends_turn_search.group(1))
@@ -42,7 +42,7 @@ def handle_action(line):
       res["turns"].append(turn["curr"])
       turn["curr"] = None
     elif "fires" in line or "uses" in line:
-      turn["curr"]["weapons"]\
+      turn["curr"]["weapons"] \
         .append(re.compile("es (.*)$").search(action_search.group(2)).group(1))
     elif action_search.group(2).startswith("Damage dealt"):
       res["turns"][-1:][0]["damages"] = \
@@ -69,6 +69,8 @@ def handle_action(line):
     })
     return
 
+
+team_regex = re.compile('(Red|Blue|Green|Yellow|Magenta|Cyan): +"(.+)" +as "(.+)"( \[Local Player\])?')
 
 with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
   for l in f.readlines():
@@ -111,12 +113,18 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
       res["roundTime"] = re.compile("Round time: (.+)").search(l).group(1)
     elif l.startswith("Total game time elapsed: "):
       res["totalGameTimeElapsed"] = re.compile("Total game time elapsed: (.+)").search(l).group(1)
+    elif team_regex.search(l):
+      team_search = team_regex.search(l)
+      res["teams"].append({
+        "color": team_search.group(1),
+        "user": team_search.group(2),
+        "team": team_search.group(3),
+        "localPlayer": team_search.group(4) is not None
+      })
     else:
       pass
       # l is not '\n' and print("Unprocessed", l)
       # current unprocessed are
-      # Unprocessed Red:       "Siwy"      as "mloda kadra"
-      # Unprocessed Blue:      "NNN`Rafka" as "Men of faith" [Local Player]
       # Unprocessed Team time totals:
       # Unprocessed mloda kadra (Siwy):       Turn: 00:09:02.62, Retreat: 00:00:59.70, Total: 00:10:02.32, Turn count: 25
       # Unprocessed Men of faith (NNN`Rafka): Turn: 00:14:04.06, Retreat: 00:01:16.04, Total: 00:15:20.10, Turn count: 26
