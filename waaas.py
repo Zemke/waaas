@@ -2,13 +2,14 @@ import pprint
 import re
 from typing import Dict, Optional, Any
 
-res: Dict[str, Any] = {"messages": [], "turns": [], "suddenDeath": None, "spectators": [], "teams": []}
+res: Dict[str, Any] = {"messages": [], "turns": [], "suddenDeath": None,
+                       "spectators": [], "teams": [], "teamTimeTotals": []}
 timestamp_regex = "(?:\d\d:){2}\d\d\.\d\d"
 timestamp_regex_w_brackets = "^\[%s\]" % timestamp_regex
 action_prefix = " "  # some weird ISO-8859-1 encoded chars
 
 turn: Dict[str, Optional[Dict]] = {"curr": None}
-
+team_time_totals_line_appeared = False
 
 def create_damage(action):
   # Damage dealt: 28 (1 kill) to mloda kadra (Siwy), 64 to Men of faith (NNN`Rafka)
@@ -121,13 +122,25 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
         "team": team_search.group(3),
         "localPlayer": team_search.group(4) is not None
       })
+    elif l.startswith("Team time totals:"):
+      team_time_totals_line_appeared = True
+    elif team_time_totals_line_appeared and "Turn count" in l and "Total" in l and "Retreat" in l and "Turn" in l:
+      team_time_totals_search = re \
+        .compile(' *(.+) \((.+)\): +Turn: ([\d:.]+), Retreat: ([\d:.]+), Total: ([\d:.]+), Turn count: (\d+)$') \
+        .search(l)
+      res["teamTimeTotals"].append({
+        "team": team_time_totals_search.group(1),
+        "user": team_time_totals_search.group(2),
+        "turn": team_time_totals_search.group(3),
+        "retreat": team_time_totals_search.group(4),
+        "total": team_time_totals_search.group(5),
+        "turnCount": int(team_time_totals_search.group(6)),
+      })
     else:
       pass
       # l is not '\n' and print("Unprocessed", l)
       # current unprocessed are
       # Unprocessed Team time totals:
-      # Unprocessed mloda kadra (Siwy):       Turn: 00:09:02.62, Retreat: 00:00:59.70, Total: 00:10:02.32, Turn count: 25
-      # Unprocessed Men of faith (NNN`Rafka): Turn: 00:14:04.06, Retreat: 00:01:16.04, Total: 00:15:20.10, Turn count: 26
       # Unprocessed End of round 3
 
 pprint.pprint(res)
