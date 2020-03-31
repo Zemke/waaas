@@ -2,7 +2,7 @@ import pprint
 import re
 from typing import Dict, Optional, Any
 
-res: Dict[str, Any] = {"messages": [], "turns": [], "suddenDeath": None}
+res: Dict[str, Any] = {"messages": [], "turns": [], "suddenDeath": None, "spectators": []}
 timestamp_regex = "(?:\d\d:){2}\d\d\.\d\d"
 timestamp_regex_w_brackets = "^\[%s\]" % timestamp_regex
 action_prefix = " "  # some weird ISO-8859-1 encoded chars
@@ -85,16 +85,18 @@ with open("game.log", encoding="ISO-8859-1", errors='ignore') as f:
     elif l.startswith("File Format Version: "):
       file_format_groups = re.compile("File Format Version: (.+) - (.+)$").search(l)
       res["fileFormatVersion"] = [file_format_groups.group(1), file_format_groups.group(2)]
+    elif l.startswith("Spectator"):
+      spectator_search = re.compile("Spectator: \"(.+)\"( \[Host\])?").search(l)
+      res["spectators"].append({
+        "user": spectator_search.group(1),
+        "host": spectator_search.group(2) is not None
+      })
     else:
       pass
       # l is not '\n' and print("Unprocessed", l)
       # current unprocessed are
       # Unprocessed Red:       "Siwy"      as "mloda kadra"
       # Unprocessed Blue:      "NNN`Rafka" as "Men of faith" [Local Player]
-      # Unprocessed Spectator: "SiD`" [Host]
-      # Unprocessed Spectator: "TVPenguin"
-      # Unprocessed Spectator: "TheExtremist"
-      # Unprocessed Spectator: "waldek"
       # Unprocessed Team time totals:
       # Unprocessed mloda kadra (Siwy):       Turn: 00:09:02.62, Retreat: 00:00:59.70, Total: 00:10:02.32, Turn count: 25
       # Unprocessed Men of faith (NNN`Rafka): Turn: 00:14:04.06, Retreat: 00:01:16.04, Total: 00:15:20.10, Turn count: 26
