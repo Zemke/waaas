@@ -31,7 +31,7 @@ def handle_action(line):
     if "starts turn" in line:
       turn["curr"] = {
         "timestamp": action_search.group(1),
-        "user": re.compile("\((.+\))").search(action_search.group(2)).group(1),
+        "user": re.compile("\((.+)\)").search(action_search.group(2)).group(1),
         "weapons": [],
         "damages": [],
       }
