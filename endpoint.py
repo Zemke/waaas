@@ -21,14 +21,20 @@ class index:
   def POST(self):
     logging.info("somebody is taking advantage of me")
     x = web.input(replay={})
-    with open('game.WAgame', 'w+b') as f:
-      f.write(x['replay'].file.read())
-    os.system('./perform')
-    web.header('Content-Type', 'application/json')
-    return json.dumps(perform())
+    try:
+      with open('game.WAgame', 'w+b') as f:
+        f.write(x['replay'].file.read())
+      os.system('./perform')
+      web.header('Content-Type', 'application/json')
+    except:
+      raise web.badrequest('supply multipart form data with file in replay= format')
+    try:
+      return json.dumps(perform())
+    except:
+      raise web.internalerror("error while processing the replay file")
   
   def GET(self):
-    return "<pre>curl -X POST 'https://waaas.zemke.io' -d 'replay=@game.WAgame'</pre>"
+    return "<pre>curl -X POST 'https://waaas.zemke.io' -F 'replay=@game.WAgame'</pre>"
 
 
 if __name__ == "__main__":
