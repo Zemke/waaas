@@ -2,4 +2,6 @@
 .idea/
 *.swp
 __pycache__/
+wa.iso
+game.WAgame
 

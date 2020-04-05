@@ -1,4 +1,8 @@
-scp ./game.WAgame zemke@192.168.178.65:~/play/game.WAgame
-ssh -t zemke@192.168.178.65 'echo "zemke" | sudo -Sv && cd ~/play && ./perform > game.log'
-scp zemke@192.168.178.65:~/play/game.log .
+#!/bin/bash
+
+docker run --rm --privileged -v /var/www/waaas/game.WAgame:/tmp/v/game.WAgame -v /var/www/waaas/wa.iso:/tmp/v/wa.iso zemke/docker-wa:3 getlog > game.log 2>&1
+
+#scp ./game.WAgame zemke@192.168.178.65:~/play/game.WAgame
+#ssh -t zemke@192.168.178.65 'echo "zemke" | sudo -Sv && cd ~/play && ./perform > game.log'
+#scp zemke@192.168.178.65:~/play/game.log .
 
