@@ -34,7 +34,25 @@ class index:
       raise web.internalerror("error while processing the replay file")
   
   def GET(self):
-    return "<pre>curl -X POST 'https://waaas.zemke.io' -F 'replay=@game.WAgame'</pre>"
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="https://zemke.io/images/icons/favicon.ico" type="image/x-icon" />
+    <title>WAaaS</title>
+    </head>
+    <body>
+      <h1>WAaaS</h1>
+      <h2>Worms Armageddon as a Service</h2>
+      <pre>curl -X POST 'https://waaas.zemke.io' -F 'replay=@game.WAgame'</pre>
+      <br/>
+      <a target="_blank" href="https://github.com/zemke/waaas">GitHub</a>
+      &bull;
+      <a target="_blank" href="https://hub.docker.com/r/zemke/docker-wa">Docker Hub</a>
+    </body>
+    </html>
+    """
 
 
 if __name__ == "__main__":
