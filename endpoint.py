@@ -22,16 +22,19 @@ class index:
     logging.info("somebody is taking advantage of me")
     x = web.input(replay={})
     try:
-      with open('game.WAgame', 'w+b') as f:
-        f.write(x['replay'].file.read())
-      os.system('./perform')
-      web.header('Content-Type', 'application/json')
-    except:
-      raise web.badrequest('supply multipart form data with file in replay= format')
-    try:
-      return json.dumps(perform())
-    except:
-      raise web.internalerror("error while processing the replay file")
+      try:
+        with open('game.WAgame', 'w+b') as f:
+          f.write(x['replay'].file.read())
+        os.system('./perform')
+        web.header('Content-Type', 'application/json')
+      except:
+        raise web.badrequest('supply multipart form data with file in replay= format')
+      try:
+        return json.dumps(perform())
+      except:
+        raise web.internalerror("error while processing the replay file")
+    finally:
+      os.system('rm -f game.log game.WAgame')
   
   def GET(self):
     return """
