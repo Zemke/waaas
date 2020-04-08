@@ -22,7 +22,7 @@ class index:
   def POST(self):
     logging.info("somebody is taking advantage of me")
     inp = web.input()
-    if "file" not in inp:
+    if "replay" not in inp:
       raise web.badrequest('supply multipart form data with file in replay= format')
     try:
       with NamedTemporaryFile(prefix='waaas_', suffix="_replay") as replay_file:
