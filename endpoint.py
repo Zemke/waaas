@@ -32,7 +32,8 @@ class index:
           web.header('Content-Type', 'application/json')
           try:
             return json.dumps(perform(log_file))
-          except:
+          except Exception as e:
+            logging.exception(e)
             raise web.internalerror("error while processing the replay file")
     finally:
       os.system('rm -f game.log game.WAgame')
