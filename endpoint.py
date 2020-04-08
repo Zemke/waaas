@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+from tempfile import NamedTemporaryFile
 
 import web
 
@@ -20,19 +21,20 @@ logging.info('starting up')
 class index:
   def POST(self):
     logging.info("somebody is taking advantage of me")
-    x = web.input(replay={})
+    inp = web.input(replay={})
+    if "file" not in inp['replay']:
+      raise web.badrequest('supply multipart form data with file in replay= format')
+
     try:
-      try:
-        with open('game.WAgame', 'w+b') as f:
-          f.write(x['replay'].file.read())
-        os.system('./perform')
-        web.header('Content-Type', 'application/json')
-      except:
-        raise web.badrequest('supply multipart form data with file in replay= format')
-      try:
-        return json.dumps(perform())
-      except:
-        raise web.internalerror("error while processing the replay file")
+      with NamedTemporaryFile(prefix='waaas_', suffix="_replay") as replay_file:
+        replay_file.write(inp['replay'].file.read())
+        with NamedTemporaryFile(mode='w', prefix='waaas_', suffix="_log", encoding="ISO-8859-1") as log_file:
+          os.system('./perform ' + replay_file.name + ' ' + log_file.name)
+          web.header('Content-Type', 'application/json')
+          try:
+            return json.dumps(perform(log_file))
+          except:
+            raise web.internalerror("error while processing the replay file")
     finally:
       os.system('rm -f game.log game.WAgame')
   
