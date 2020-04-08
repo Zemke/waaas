@@ -25,11 +25,13 @@ class index:
     if "replay" not in inp:
       raise web.badrequest('supply multipart form data with file in replay= format')
     try:
-      with NamedTemporaryFile(prefix='waaas_', suffix="_replay") as replay_file:
-        replay_file.write(inp['replay'].file.read())
-        with NamedTemporaryFile(mode='w', prefix='waaas_', suffix="_log", encoding="ISO-8859-1") as log_file:
+      with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_replay") as replay_file:
+        replay_file.write(inp['replay'])
+        with NamedTemporaryFile(mode='r+', prefix='waaas_', suffix="_log", encoding="ISO-8859-1") as log_file:
           os.system('./perform ' + replay_file.name + ' ' + log_file.name)
           web.header('Content-Type', 'application/json')
+          if os.stat(log_file.name).st_size == 0:
+            raise web.internalerror("could not process replay file")
           try:
             return json.dumps(perform(log_file))
           except Exception as e:
