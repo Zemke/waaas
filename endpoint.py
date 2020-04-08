@@ -21,10 +21,9 @@ logging.info('starting up')
 class index:
   def POST(self):
     logging.info("somebody is taking advantage of me")
-    inp = web.input(replay={})
-    if "file" not in inp['replay']:
+    inp = web.input()
+    if "file" not in inp:
       raise web.badrequest('supply multipart form data with file in replay= format')
-
     try:
       with NamedTemporaryFile(prefix='waaas_', suffix="_replay") as replay_file:
         replay_file.write(inp['replay'].file.read())
