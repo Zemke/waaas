@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
-import pprint
 import re
 import sys
 from typing import Dict, Optional, Any
 
-res: Dict[str, Any] = {"messages": [], "turns": [], "suddenDeath": None,
-                       "spectators": [], "teams": [], "teamTimeTotals": []}
+res: Dict[str, Any] = {}
 timestamp_regex = "(?:\d\d:){2}\d\d\.\d\d"
 timestamp_regex_w_brackets = "^\[%s\]" % timestamp_regex
 action_prefix = " "  # some weird ISO-8859-1 encoded chars
@@ -14,6 +12,15 @@ action_prefix = " "  # some weird ISO-8859-1 encoded chars
 turn: Dict[str, Optional[Dict]] = {"curr": None}
 team_time_totals_line_appeared = {"curr": False}
 team_regex = re.compile('(Red|Blue|Green|Yellow|Magenta|Cyan): +"(.+)" +as "(.+)"( \[Local Player\])?')
+
+
+def init_res():
+  res["messages"] = []
+  res["turns"] = []
+  res["suddenDeath"] = []
+  res["spectators"] = []
+  res["teams"] = []
+  res["teamTimeTotals"] = []
 
 
 def create_damage(action):
@@ -67,6 +74,7 @@ def handle_action(line):
 
 
 def perform(f):
+  init_res()
   for l in f.readlines():
     if re.search("({0}) ".format(timestamp_regex_w_brackets), l):
       handle_action(l)
