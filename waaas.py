@@ -17,7 +17,7 @@ team_regex = re.compile('(Red|Blue|Green|Yellow|Magenta|Cyan): +"(.+)" +as "(.+)
 def init_res():
   res["messages"] = []
   res["turns"] = []
-  res["suddenDeath"] = []
+  res["suddenDeath"] = None
   res["spectators"] = []
   res["teams"] = []
   res["teamTimeTotals"] = []
