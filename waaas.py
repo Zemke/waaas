@@ -138,6 +138,8 @@ def perform(f):
         "total": team_time_totals_search.group(5),
         "turnCount": int(team_time_totals_search.group(6)),
       })
+    elif 'The round was drawn.' in l:
+      res["winsTheRound"] = None
   return res
 
 
