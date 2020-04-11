@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import pprint
+import json
 import re
 import sys
 from typing import Dict, Optional, Any
@@ -144,4 +144,4 @@ def perform(f):
 if __name__ == '__main__':
   with open(sys.argv[1], encoding="ISO-8859-1", errors='ignore') as arg_f:
     perform(arg_f)
-  pprint.pprint(res)
+  print(json.dumps(res, indent=4))
