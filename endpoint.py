@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import time
 from tempfile import NamedTemporaryFile
 
 import web
@@ -24,10 +25,14 @@ class index:
     inp = web.input()
     if "replay" not in inp:
       raise web.badrequest('supply multipart form data with file in replay= format')
+    while web.running:
+      time.sleep(1)
+    logging.info("done waiting")
     try:
       with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_replay") as replay_file:
         replay_file.write(inp['replay'])
         with NamedTemporaryFile(mode='r+', prefix='waaas_', suffix="_log", encoding="ISO-8859-1") as log_file:
+          web.running = True
           os.system('./perform ' + replay_file.name + ' ' + log_file.name)
           web.header('Content-Type', 'application/json')
           if os.stat(log_file.name).st_size == 0:
@@ -38,6 +43,7 @@ class index:
             logging.exception(e)
             raise web.internalerror("error while processing the replay file")
     finally:
+      web.running = False
       os.system('rm -f game.log game.WAgame')
   
   def GET(self):
@@ -63,5 +69,6 @@ class index:
 
 
 if __name__ == "__main__":
+  web.running = False
   app = web.application(urls, globals())
   app.run()
