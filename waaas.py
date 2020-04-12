@@ -103,6 +103,13 @@ def perform(f):
         "worm": most_dmg_w_one_shot_search.group(2),
         "team": most_dmg_w_one_shot_search.group(3),
       }
+    elif l.startswith("Most kills with one shot"):
+      most_dmg_w_one_shot_search = re.compile("Most kills with one shot: (\d+) - (.+) \((.*)\)").search(l)
+      res["mostKillsWithOneShot"] = {
+        "damage": most_dmg_w_one_shot_search.group(1),
+        "worm": most_dmg_w_one_shot_search.group(2),
+        "team": most_dmg_w_one_shot_search.group(3),
+      }
     elif " wins the round." in l:
       res["winsTheRound"] = re.compile("(.+) wins the round\.").search(l).group(1)
     elif l.startswith("Worm of the round: "):
