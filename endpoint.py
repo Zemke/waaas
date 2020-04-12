@@ -44,7 +44,6 @@ class index:
             raise web.internalerror("error while processing the replay file")
     finally:
       web.running = False
-      os.system('rm -f game.log game.WAgame')
   
   def GET(self):
     return """
