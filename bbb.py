@@ -19,7 +19,10 @@ with open(sys.argv[1], "rb") as f:
     res["palette"].append(struct.unpack('B', f.read(1))[0])
   res["width"] = struct.unpack('h', f.read(2))
   res["height"] = struct.unpack('h', f.read(2))
-  res["data"] = f.read()
+
+  datalength = int(res["width"][0] * res["height"][0] * res["bpp"][0] / 8)
+  res["data"] = f.read(datalength)
+
 
 img = Image.frombytes('P', (res["width"][0], res["height"][0]), res["data"])
 img.putpalette(res["palette"])
