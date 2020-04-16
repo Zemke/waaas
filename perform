@@ -1,4 +1,4 @@
 #!/bin/bash
 
-docker run --rm --privileged -v $1:/tmp/v/land -v $2:/tmp/v/game.WAgame -v $(pwd)/wa.iso:/tmp/v/wa.iso zemke/docker-wa:latest-1 getlog > $3 2> err.log
+docker run --rm --privileged -v $1:/tmp/v/land -v $2:/tmp/v/game.WAgame -v $(pwd)/wa.iso:/tmp/v/wa.iso zemke/docker-wa:latest getlog > $3 2> err.log
 
