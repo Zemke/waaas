@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import re
 import json
 import logging
 import os
@@ -16,9 +17,17 @@ logging.basicConfig(
   filename='waaas.log', filemode='w', level=logging.DEBUG,
   format='%(asctime)s - %(levelname)s - %(message)s')
 
-urls = ('/', 'index')
+urls = (
+  '/', 'index',
+  '/map/([^/]+)/?', 'map'
+)
 
 logging.info('starting up')
+
+
+class map:
+  def GET(self, name):
+    return open("/tmp/waaas_{0}_map".format(name), 'rb').read()
 
 
 class index:
@@ -50,7 +59,7 @@ class index:
             raise web.internalerror("could not process replay file")
           try:
             logjson = waaas.perform(log_file)
-            logjson["map"] = mappath
+            logjson["map"] = "/map/" + re.compile("/tmp/waaas_(.+)_map").search(mappath).group(1)
             return json.dumps(logjson)
           except Exception as e:
             logging.exception(e)
