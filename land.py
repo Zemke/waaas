@@ -5,10 +5,8 @@ import sys
 
 import bbb
 
-res = {}
 
-with open(sys.argv[1], "rb") as f:
-  print(f.read(288))  # Apparently 288 bytes till the img data
+def perform(f):
   """
   res["signature"] = f.read(4)
   res["length"] = struct.unpack('i', f.read(4))
@@ -21,10 +19,11 @@ with open(sys.argv[1], "rb") as f:
   res["structuresX"] = struct.unpack('i', f.read(4))
   res["structuresY"] = struct.unpack('i', f.read(4))
   """
-  res["foreground"] = bbb.perform(f)
-  #print("foreground", res["foreground"])
-  bbb.toimage(res["foreground"]).show()
+  f.read(288)  # apparently 288 bytes till the img data
+  return {"foreground": bbb.perform(f)}
 
-#print(res)
-
+if __name__ == '__main__':
+  with open(sys.argv[1], "rb") as f:
+    res = perform(f)
+    bbb.toimage(res["foreground"]).show()
 
