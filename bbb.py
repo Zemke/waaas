@@ -6,7 +6,7 @@ from PIL import Image
 
 res = {}
 
-with open(sys.argv[1], "rb") as f:
+def perform(f):
   res["signature"] = struct.unpack('i', f.read(4))
   res["length"] = struct.unpack('i', f.read(4))
   res["bpp"] = struct.unpack('b', f.read(1))
@@ -23,8 +23,17 @@ with open(sys.argv[1], "rb") as f:
   datalength = int(res["width"][0] * res["height"][0] * res["bpp"][0] / 8)
   res["data"] = f.read(datalength)
 
+  return res
 
-img = Image.frombytes('P', (res["width"][0], res["height"][0]), res["data"])
-img.putpalette(res["palette"])
-img.show()
+
+def toimage(res):
+  img = Image.frombytes('P', (res["width"][0], res["height"][0]), res["data"])
+  img.putpalette(res["palette"])
+  return img
+
+
+if __name__ == '__main__':
+  with open(sys.argv[1], "rb") as f:
+    res = perform(f)
+    toimage(res).show()
 
