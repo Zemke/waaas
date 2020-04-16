@@ -4,11 +4,13 @@ import json
 import logging
 import os
 import time
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 import web
 
-from waaas import perform
+import waaas
+import land
+import bbb
 
 logging.basicConfig(
   filename='waaas.log', filemode='w', level=logging.DEBUG,
@@ -33,12 +35,23 @@ class index:
         replay_file.write(inp['replay'])
         with NamedTemporaryFile(mode='r+', prefix='waaas_', suffix="_log", encoding="ISO-8859-1") as log_file:
           web.running = True
-          os.system('./perform ' + replay_file.name + ' ' + log_file.name)
+          mappath = None
+          with TemporaryDirectory(prefix="waaas_", suffix="_land") as land_dir:
+            os.system('./perform ' + land_dir + ' ' +  replay_file.name + ' ' + log_file.name)
+            with open(land_dir + "/land.dat", mode='rb') as land_file:
+              try:
+                with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_map", delete=False) as map_file:
+                  bbb.toimage(land.perform(land_file)["foreground"]).save(map_file, format='PNG')
+                  mappath = map_file.name
+              except Exception as e:
+                logging.exception(e)
           web.header('Content-Type', 'application/json')
           if os.stat(log_file.name).st_size == 0:
             raise web.internalerror("could not process replay file")
           try:
-            return json.dumps(perform(log_file))
+            logjson = waaas.perform(log_file)
+            logjson["map"] = mappath
+            return json.dumps(logjson)
           except Exception as e:
             logging.exception(e)
             raise web.internalerror("error while processing the replay file")
