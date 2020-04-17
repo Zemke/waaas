@@ -17,10 +17,15 @@ def perform(f):
   res["unknown"] = struct.unpack('i', f.read(4))
   res["numOfStructures"] = struct.unpack('i', f.read(4))
   f.read(res["numOfStructures"][0] * 2 * 4)
-  return {"foreground": bbb.perform(f)}
+  res["foreground"] = bbb.perform(f)
+  res["monochrome"] = bbb.perform(f)
+  res["background"] = bbb.perform(f)
+  return res
 
 if __name__ == '__main__':
   with open(sys.argv[1], "rb") as f:
     res = perform(f)
     bbb.toimage(res["foreground"]).show()
+    bbb.toimage(res["monochrome"]).show()
+    bbb.toimage(res["background"]).show()
 

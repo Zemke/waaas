@@ -29,8 +29,10 @@ def perform(f):
 
 
 def toimage(res):
-  img = Image.frombytes('P', (res["width"][0], res["height"][0]), res["data"])
-  img.putpalette(res["palette"])
+  mode = "P" if "palette" in res else "1"
+  img = Image.frombytes(mode, (res["width"][0], res["height"][0]), res["data"])
+  if "palette" in res:
+    img.putpalette(res["palette"])
   return img
 
 
