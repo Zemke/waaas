@@ -11,12 +11,14 @@ def perform(f):
   res["length"] = struct.unpack('i', f.read(4))
   res["bpp"] = struct.unpack('b', f.read(1))
   res["flags"] = f.read(1)
-  res["numOfColors"] = struct.unpack('h', f.read(2))
-  res["palette"] = [0,0,0]
-  for c in range(int(res["numOfColors"][0])):
-    res["palette"].append(struct.unpack('B', f.read(1))[0])
-    res["palette"].append(struct.unpack('B', f.read(1))[0])
-    res["palette"].append(struct.unpack('B', f.read(1))[0])
+  print('flags', res["flags"])
+  if res["flags"] == b'\x80':
+    res["numOfColors"] = struct.unpack('h', f.read(2))
+    res["palette"] = [0,0,0]
+    for c in range(int(res["numOfColors"][0])):
+      res["palette"].append(struct.unpack('B', f.read(1))[0])
+      res["palette"].append(struct.unpack('B', f.read(1))[0])
+      res["palette"].append(struct.unpack('B', f.read(1))[0])
   res["width"] = struct.unpack('h', f.read(2))
   res["height"] = struct.unpack('h', f.read(2))
 
