@@ -26,6 +26,10 @@ if __name__ == '__main__':
   with open(sys.argv[1], "rb") as f:
     res = perform(f)
     bbb.toimage(res["foreground"]).show()
-    bbb.toimage(res["monochrome"]).show()
-    bbb.toimage(res["background"]).show()
+
+    monochrome = bbb.toimage(res["monochrome"])
+    bbb.mirror(monochrome).show()
+
+    background = bbb.toimage(res["background"])
+    bbb.mirror(background).show()
 
