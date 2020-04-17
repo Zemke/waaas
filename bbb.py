@@ -4,9 +4,9 @@ import struct
 import sys
 from PIL import Image
 
-res = {}
 
 def perform(f):
+  res = {}
   res["signature"] = struct.unpack('i', f.read(4))
   res["length"] = struct.unpack('i', f.read(4))
   res["bpp"] = struct.unpack('b', f.read(1))
