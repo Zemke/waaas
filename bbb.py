@@ -24,9 +24,10 @@ def perform(f):
 
   datalength = int(res["width"][0] * res["height"][0] * res["bpp"][0] / 8)
   if res["bpp"][0] == 1:
+    horizontalbytes = int(int(res["width"][0]) / 8)
     res["data"] = b''
-    for _ in range(int(datalength/240)):
-      b = f.read(240)
+    for _ in range(int(datalength / horizontalbytes)):
+      b = f.read(horizontalbytes)
       res["data"] += b[::-1]
   else:
     res["data"] = f.read(datalength)
