@@ -44,14 +44,14 @@ class index:
         replay_file.write(inp['replay'])
         with NamedTemporaryFile(mode='r+', prefix='waaas_', suffix="_log", encoding="ISO-8859-1") as log_file:
           web.running = True
-          mappath = None
+          mapjson = None
           with TemporaryDirectory(prefix="waaas_", suffix="_land") as land_dir:
             os.system('./perform ' + land_dir + ' ' +  replay_file.name + ' ' + log_file.name)
             with open(land_dir + "/land.dat", mode='rb') as land_file:
               try:
                 with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_map", delete=False) as map_file:
                   bbb.toimage(land.perform(land_file)["foreground"]).save(map_file, format='PNG')
-                  mappath = map_file.name
+                  mapjson = "/map/" + re.compile("/tmp/waaas_(.+)_map").search(map_file.name).group(1)
               except Exception as e:
                 logging.exception(e)
           web.header('Content-Type', 'application/json')
@@ -59,7 +59,7 @@ class index:
             raise web.internalerror("could not process replay file")
           try:
             logjson = waaas.perform(log_file)
-            logjson["map"] = "/map/" + re.compile("/tmp/waaas_(.+)_map").search(mappath).group(1)
+            logjson["map"] = mapjson
             return json.dumps(logjson)
           except Exception as e:
             logging.exception(e)
