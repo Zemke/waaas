@@ -79,6 +79,12 @@ def perform(f):
   for l in f.readlines():
     if re.search("({0}) ".format(timestamp_regex_w_brackets), l):
       handle_action(l)
+    elif l.startswith("Game engine version: "):
+      res["engineVersion"] = re.compile("Game engine version: (.+)").search(l).group(1)
+    elif l.startswith("File Format Version: "):
+      res["fileFormatVersion"] = re.compile("File Format Version: (.+)").search(l).group(1)
+    elif l.startswith("Exported with Version: "):
+      res["exportVersion"] = re.compile("Exported with Version: (.+)").search(l).group(1)
     elif l.startswith("Game ID: "):
       res["gameId"] = re.compile("Game ID: \"(\d+)\"").search(l).group(1)
     elif l.startswith("Game Started at "):
