@@ -55,7 +55,7 @@ def handle_action(line):
       turn["curr"] = None
     elif "fires" in line or "uses" in line:
       turn["curr"]["weapons"] \
-        .append(re.compile("es (.+?)(?: \(|$)").search(action_search.group(2)).group(1))
+        .append(re.compile("\) (?:fires|uses) (.+?)(?: \(|$)").search(action_search.group(2)).group(1))
     elif action_search.group(2).startswith("Damage dealt"):
       res["turns"][-1:][0]["damages"] = \
         list(map(create_damage, action_search.group(2)[14:].split(', ')))
