@@ -45,13 +45,16 @@ class index:
         with NamedTemporaryFile(mode='r+', prefix='waaas_', suffix="_log", encoding="ISO-8859-1") as log_file:
           web.running = True
           mapjson = None
+          texturejson = None
           with TemporaryDirectory(prefix="waaas_", suffix="_land") as land_dir:
             os.system('./perform ' + land_dir + ' ' +  replay_file.name + ' ' + log_file.name)
             with open(land_dir + "/land.dat", mode='rb') as land_file:
               try:
                 with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_map", delete=False) as map_file:
-                  bbb.toimage(land.perform(land_file)["foreground"]).save(map_file, format='PNG')
+                  landres = land.perform(land_file)
+                  bbb.toimage(landres["foreground"]).save(map_file, format='PNG')
                   mapjson = "/map/" + re.compile("/tmp/waaas_(.+)_map").search(map_file.name).group(1)
+                  texturejson = landres["texture"]
               except Exception as e:
                 logging.exception(e)
           web.header('Content-Type', 'application/json')
@@ -60,6 +63,7 @@ class index:
           try:
             logjson = waaas.perform(log_file)
             logjson["map"] = mapjson
+            logjson["texture"] = texturejson
             return json.dumps(logjson)
           except Exception as e:
             logging.exception(e)
