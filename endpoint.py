@@ -53,8 +53,9 @@ class index:
                 with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_map", delete=False) as map_file:
                   landres = land.perform(land_file)
                   bbb.toimage(landres["foreground"]).save(map_file, format='PNG')
-                  mapjson = "/map/" + re.compile("/tmp/waaas_(.+)_map").search(map_file.name).group(1)
                   texturejson = landres["texture"]
+                  # on mac this is /var/folders/d8/yhw8dhsn0njgq7txxng0b_380000gn/T/waaas_q35uacgp_map
+                  mapjson = "/map/" + re.compile("/waaas_(.+)_map").search(map_file.name).group(1)
               except Exception as e:
                 logging.exception(e)
           web.header('Content-Type', 'application/json')
