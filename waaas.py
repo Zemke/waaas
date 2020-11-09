@@ -76,9 +76,9 @@ def handle_action(line):
     return
 
 
-def perform(f):
+def perform(lines):
   init_res()
-  for l in f.readlines():
+  for l in lines:
     if re.search("({0}) ".format(timestamp_regex_w_brackets), l):
       handle_action(l)
     elif l.startswith("Game engine version: "):
@@ -159,6 +159,13 @@ def perform(f):
 
 
 if __name__ == '__main__':
-  with open(sys.argv[1], encoding="ISO-8859-1", errors='ignore') as arg_f:
-    perform(arg_f)
+  encoding="ISO-8859-1"
+  errors="ignore"
+  if len(sys.argv) < 2:
+    sys.stdin.reconfigure(encoding=encoding, errors=errors)
+    perform(sys.stdin.read().splitlines())
+  else:
+    with open(sys.argv[1], encoding=encoding, errors=errors) as arg_f:
+      perform(arg_f.readlines())
   print(json.dumps(res, indent=4))
+
