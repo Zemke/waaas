@@ -5,7 +5,7 @@ import json
 import logging
 import os
 import time
-from tempfile import NamedTemporaryFile, TemporaryDirectory
+from tempfile import NamedTemporaryFile, TemporaryDirectory, gettempdir
 
 import web
 
@@ -27,7 +27,7 @@ logging.info('starting up')
 
 class map:
   def GET(self, name):
-    return open("/tmp/waaas_{0}_map".format(name), 'rb').read()
+    return open(gettempdir() + "/waaas_{0}_map".format(name), 'rb').read()
 
 
 class index:
@@ -54,7 +54,6 @@ class index:
                   landres = land.perform(land_file)
                   bbb.toimage(landres["foreground"]).save(map_file, format='PNG')
                   texturejson = landres["texture"]
-                  # on mac this is /var/folders/d8/yhw8dhsn0njgq7txxng0b_380000gn/T/waaas_q35uacgp_map
                   mapjson = "/map/" + re.compile("/waaas_(.+)_map").search(map_file.name).group(1)
               except Exception as e:
                 logging.exception(e)
