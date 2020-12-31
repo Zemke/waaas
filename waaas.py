@@ -13,6 +13,7 @@ action_prefix = " "  # some weird ISO-8859-1 encoded chars
 turn: Dict[str, Optional[Dict]] = {"curr": None}
 team_time_totals_line_appeared = {"curr": False}
 team_regex = re.compile('(Red|Blue|Green|Yellow|Magenta|Cyan): +"(.+)" +as "(.+)"( \[Local Player\])?')
+worm_placement = {"curr": None}
 
 
 def init_res():
@@ -44,6 +45,19 @@ def handle_action(line):
         "weapons": [],
         "damages": [],
       }
+    elif "is placing a Worm" in line:
+      if "wormPlacements" not in res:
+        res["wormPlacements"] = []
+      if worm_placement["curr"]:
+        res["wormPlacements"].append(worm_placement["curr"])
+      worm_placement["curr"] = {
+        "start": action_search.group(1),
+        "user": re.compile(".+\((.+)\) is placing a Worm$").search(action_search.group(2)).group(1),
+      }
+    elif 'Worm placement completed' in line:
+      res["wormPlacements"].append(worm_placement["curr"])
+      res["wormPlacementCompleted"] = \
+          re.compile(f"\[({timestamp_regex})\] {action_prefix}(.*)$").search(line).group(1);
     elif "ends turn" in line or "loses turn due to loss of control" in line:
       ends_turn_search = re \
         .compile("; time used: ([\d.]+) sec turn, ([\d.]+) sec retreat$") \
@@ -54,8 +68,11 @@ def handle_action(line):
       res["turns"].append(turn["curr"])
       turn["curr"] = None
     elif "fires" in line or "uses" in line:
-      turn["curr"]["weapons"] \
-        .append(re.compile("\) (?:fires|uses) (.+?)(?: \(|$)").search(action_search.group(2)).group(1))
+      if worm_placement["curr"] is not None and "wormPlacementCompleted" not in res:
+        worm_placement["curr"]["finish"] = action_search.group(1)
+      else:
+        turn["curr"]["weapons"] \
+          .append(re.compile("\) (?:fires|uses) (.+?)(?: \(|$)").search(action_search.group(2)).group(1))
     elif action_search.group(2).startswith("Damage dealt"):
       res["turns"][-1:][0]["damages"] = []
       split = action_search.group(2)[14:].split('), ')
