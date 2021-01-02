@@ -23,6 +23,7 @@ def init_res():
   res["spectators"] = []
   res["teams"] = []
   res["teamTimeTotals"] = []
+  res["wormPlacementCompleted"] = None
 
 
 def create_damage(action):
@@ -48,7 +49,7 @@ def handle_action(line):
     elif "is placing a Worm" in line:
       if "wormPlacements" not in res:
         res["wormPlacements"] = []
-      if worm_placement["curr"]:
+      if worm_placement["curr"] is not None:
         res["wormPlacements"].append(worm_placement["curr"])
       worm_placement["curr"] = {
         "start": action_search.group(1),
@@ -56,6 +57,7 @@ def handle_action(line):
       }
     elif 'Worm placement completed' in line:
       res["wormPlacements"].append(worm_placement["curr"])
+      worm_placement["curr"] = None
       res["wormPlacementCompleted"] = \
           re.compile(f"\[({timestamp_regex})\] {action_prefix}(.*)$").search(line).group(1);
     elif "ends turn" in line or "loses turn due to loss of control" in line:
@@ -68,7 +70,7 @@ def handle_action(line):
       res["turns"].append(turn["curr"])
       turn["curr"] = None
     elif "fires" in line or "uses" in line:
-      if worm_placement["curr"] is not None and "wormPlacementCompleted" not in res:
+      if worm_placement["curr"] is not None and res["wormPlacementCompleted"] is None:
         worm_placement["curr"]["finish"] = action_search.group(1)
       else:
         turn["curr"]["weapons"] \
