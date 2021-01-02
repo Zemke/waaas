@@ -88,6 +88,14 @@ class index:
       <a target="_blank" href="https://github.com/zemke/waaas">GitHub</a>
       &bull;
       <a target="_blank" href="https://hub.docker.com/r/zemke/docker-wa">Docker Hub</a>
+      <br/>
+      <hr/>
+      <br/>
+      <form action="/" method="POST" target="_blank" enctype="multipart/form-data">
+        <label for="replay">Replay</label>
+        <input type="file" id="replay" name="replay" accept="*.WAgame"/>
+        <input type="submit" value="Submit" />
+      </form>
     </body>
     </html>
     """
