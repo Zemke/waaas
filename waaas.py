@@ -81,8 +81,12 @@ def handle_action(line):
       split = action_search.group(2)[14:].split('), ')
       for idx, dmg in enumerate(split):
         damages.append(create_damage(dmg + ")" if idx != len(split) - 1 else dmg))
-      if worm_placement["curr"] is not None and res["wormPlacementCompleted"] is None:
-        worm_placement["curr"]["damages"] = damages
+      if len(res["turns"]) == 0:
+        if worm_placement["curr"] is None:
+          # Damage after "Worm placement completed" entry
+          res["wormPlacements"][-1]["damages"] = damages
+        else:
+          worm_placement["curr"]["damages"] = damages
       else:
         res["turns"][-1:][0]["damages"] = damages
     elif action_search.group(2) == "Sudden Death":
