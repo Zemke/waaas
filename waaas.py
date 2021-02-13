@@ -54,6 +54,7 @@ def handle_action(line):
       worm_placement["curr"] = {
         "start": action_search.group(1),
         "user": re.compile(".+\((.+)\) is placing a Worm$").search(action_search.group(2)).group(1),
+        "damages": []
       }
     elif 'Worm placement completed' in line:
       res["wormPlacements"].append(worm_placement["curr"])
