@@ -111,7 +111,8 @@ def perform(lines):
     elif l.startswith("Exported with Version: "):
       res["exportVersion"] = re.compile("Exported with Version: (.+)").search(l).group(1)
     elif l.startswith("Game ID: "):
-      res["gameId"] = re.compile("Game ID: \"(\d+)\"").search(l).group(1)
+      # Can be "extern" (might be related to RubberWorm) or quoted nummeric ID.
+      res["gameId"] = re.compile("Game ID: \"(.+)\"").search(l).group(1)
     elif l.startswith("Game Started at "):
       res["startedAt"] = re.compile("Game Started at ([\d\- :]+ GMT)").search(l).group(1)
     elif l.startswith("Game Engine Version: "):
