@@ -17,6 +17,7 @@ worm_placement = {"curr": None}
 
 
 def init_res():
+  res.clear()
   res["messages"] = []
   res["turns"] = []
   res["suddenDeath"] = None
@@ -24,6 +25,7 @@ def init_res():
   res["teams"] = []
   res["teamTimeTotals"] = []
   res["wormPlacementCompleted"] = None
+  res["wormPlacements"] = []
 
 
 def create_damage(action):
@@ -47,8 +49,6 @@ def handle_action(line):
         "damages": [],
       }
     elif "is placing a Worm" in line:
-      if "wormPlacements" not in res:
-        res["wormPlacements"] = []
       if worm_placement["curr"] is not None:
         res["wormPlacements"].append(worm_placement["curr"])
       worm_placement["curr"] = {
