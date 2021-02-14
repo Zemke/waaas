@@ -134,14 +134,16 @@ def perform(lines):
         "host": spectator_search.group(2) is not None
       })
     elif l.startswith("Most damage with one shot"):
-      most_dmg_w_one_shot_search = re.compile("Most damage with one shot: (\d+) - (.+) \((.*)\)").search(l)
+      # Worm name matching with asterisk rather than plus 'cause I've seen empty worm names.
+      most_dmg_w_one_shot_search = re.compile("Most damage with one shot: (\d+) - (.*) \((.*)\)").search(l)
       res["mostDamageWithOneShot"] = {
         "damage": most_dmg_w_one_shot_search.group(1),
         "worm": most_dmg_w_one_shot_search.group(2),
         "team": most_dmg_w_one_shot_search.group(3),
       }
     elif l.startswith("Most kills with one shot"):
-      most_dmg_w_one_shot_search = re.compile("Most kills with one shot: (\d+) - (.+) \((.*)\)").search(l)
+      # Worm name matching with asterisk rather than plus 'cause I've seen empty worm names.
+      most_dmg_w_one_shot_search = re.compile("Most kills with one shot: (\d+) - (.*) \((.*)\)").search(l)
       res["mostKillsWithOneShot"] = {
         "damage": most_dmg_w_one_shot_search.group(1),
         "worm": most_dmg_w_one_shot_search.group(2),
@@ -150,7 +152,8 @@ def perform(lines):
     elif " wins the round." in l:
       res["winsTheRound"] = re.compile("(.+) wins the round\.").search(l).group(1)
     elif l.startswith("Worm of the round: "):
-      worm_of_the_round_search = re.compile("Worm of the round: (.+) \((.+)\)").search(l)
+      # Worm name matching with asterisk rather than plus 'cause I've seen empty worm names.
+      worm_of_the_round_search = re.compile("Worm of the round: (.*) \((.+)\)").search(l)
       res["wormOfTheRound"] = {
         "worm": worm_of_the_round_search.group(1),
         "team": worm_of_the_round_search.group(2),
