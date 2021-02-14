@@ -70,12 +70,6 @@ def handle_action(line):
       turn["curr"]["lossOfControl"] = "loses turn due to loss of control" in line
       res["turns"].append(turn["curr"])
       turn["curr"] = None
-    elif "fires" in line or "uses" in line:
-      if worm_placement["curr"] is not None and res["wormPlacementCompleted"] is None:
-        worm_placement["curr"]["finish"] = action_search.group(1)
-      else:
-        turn["curr"]["weapons"] \
-          .append(re.compile("\) (?:fires|uses) (.+?)(?: \(|$)").search(action_search.group(2)).group(1))
     elif action_search.group(2).startswith("Damage dealt"):
       damages = []
       split = action_search.group(2)[14:].split('), ')
@@ -89,6 +83,12 @@ def handle_action(line):
           worm_placement["curr"]["damages"] = damages
       else:
         res["turns"][-1:][0]["damages"] = damages
+    elif "fires" in line or "uses" in line:
+      if worm_placement["curr"] is not None and res["wormPlacementCompleted"] is None:
+        worm_placement["curr"]["finish"] = action_search.group(1)
+      else:
+        turn["curr"]["weapons"] \
+          .append(re.compile("\) (?:fires|uses) (.+?)(?: \(|$)").search(action_search.group(2)).group(1))
     elif action_search.group(2) == "Sudden Death":
       res["suddenDeath"] = action_search.group(1)
     elif action_search.group(2).startswith("Game Ends"):
