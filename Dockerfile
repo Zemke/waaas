@@ -14,12 +14,13 @@ RUN apt-get update \
   && python -m pip install --target ${FUNCTION_DIR} awslambdaric
 
 COPY lambda/* ${FUNCTION_DIR}
+COPY lambda/entry_script.sh /entry_script.sh
+
+ADD lambda/aws-lambda-rie /usr/local/bin/aws-lambda-rie
 
 WORKDIR ${FUNCTION_DIR}
 
 CMD [ "app.handler" ]
 
-COPY lambda/entry_script.sh /entry_script.sh
-ADD lambda/aws-lambda-rie /usr/local/bin/aws-lambda-rie
 ENTRYPOINT [ "/entry_script.sh" ]
 
