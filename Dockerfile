@@ -17,7 +17,6 @@ COPY lambda/* ${FUNCTION_DIR}
 
 WORKDIR ${FUNCTION_DIR}
 
-ENTRYPOINT [ "python", "-m", "awslambdaric" ]
 CMD [ "app.handler" ]
 
 COPY lambda/entry_script.sh /entry_script.sh
