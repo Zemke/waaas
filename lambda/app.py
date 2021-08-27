@@ -61,7 +61,7 @@ def handler(event, context):
   print("Received event: ", event)
   print("Context: ", context)
   s3 = boto3.resource('s3')
-  obj = s3.Object('waaas_input', event['Records'][0]["s3"]["object"]["key"])
+  obj = s3.Object('waaas-input', event['Records'][0]["s3"]["object"]["key"])
   with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_replay") as replay_file:
     obj.download_fileobj(replay_file)
     handle(replay_file)
