@@ -71,14 +71,13 @@ def handle(replay_file):
   with NamedTemporaryFile(mode='r+', prefix='waaas_', suffix="_log", encoding="ISO-8859-1") as log_file:
     mapjson = None
     texturejson = None
-    with TemporaryDirectory(prefix="waaas_", suffix="_land") as land_dir:
-      os.system('wa-getlog < {} > {}'.format(replay_file.name, log_file.name))
-      with open('/tmp/.wine/drive_c/WA/DATA/land.dat', mode='rb') as land_file:
-        with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_map", delete=False) as map_file:
-          landres = land.perform(land_file)
-          bbb.toimage(landres["foreground"]).save(map_file, format='PNG')
-          texturejson = landres["texture"]
-          mapjson = "/map/" + re.compile("/waaas_(.+)_map").search(map_file.name).group(1)
+    os.system('wa-getlog < {} > {}'.format(replay_file.name, log_file.name))
+    with open('/tmp/.wine/drive_c/WA/DATA/land.dat', mode='rb') as land_file:
+      with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_map", delete=False) as map_file:
+        landres = land.perform(land_file)
+        bbb.toimage(landres["foreground"]).save(map_file, format='PNG')
+        texturejson = landres["texture"]
+        mapjson = "/map/" + re.compile("/waaas_(.+)_map").search(map_file.name).group(1)
     if os.stat(log_file.name).st_size == 0:
       raise Exception("could not process replay file")
     logjson = waaas.perform(log_file)
