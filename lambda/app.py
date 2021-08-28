@@ -73,7 +73,7 @@ def handle(replay_file):
     texturejson = None
     with TemporaryDirectory(prefix="waaas_", suffix="_land") as land_dir:
       os.system('wa-getlog < {} > {}'.format(replay_file.name, log_file.name))
-      with open('/root/.wine/drive_c/WA/DATA/land.dat', mode='rb') as land_file:
+      with open('/tmp/.wine/drive_c/WA/DATA/land.dat', mode='rb') as land_file:
         with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_map", delete=False) as map_file:
           landres = land.perform(land_file)
           bbb.toimage(landres["foreground"]).save(map_file, format='PNG')
