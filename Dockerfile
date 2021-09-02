@@ -20,6 +20,9 @@ ADD lambda/aws-lambda-rie /usr/local/bin/aws-lambda-rie
 
 WORKDIR ${FUNCTION_DIR}
 
+ENV WINEPREFIX="/mnt/wine/.wine"
+ENV DISPLAY=""
+
 CMD [ "app.handler" ]
 
 ENTRYPOINT [ "/entry_script.sh" ]
