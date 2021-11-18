@@ -27,11 +27,22 @@ def perform(f):
 if __name__ == '__main__':
   with open(sys.argv[1], "rb") as f:
     res = perform(f)
-    bbb.toimage(res["foreground"]).show()
+    if len(sys.argv) > 1:
+      dest = sys.argv[2]
+      if dest.lower().endswith(".png"):
+        p = dest
+      else:
+        from random import choice
+        from string import ascii_letters, digits
+        from os import path
+        p = path.join(dest, ''.join(choice(ascii_letters + digits) for _ in range(8))) + ".png"
+      bbb.toimage(res["foreground"]).save(p, format='PNG')
+    else:
+      bbb.toimage(res["foreground"]).show()
 
-    monochrome = bbb.toimage(res["monochrome"])
-    bbb.mirror(monochrome).show()
+      monochrome = bbb.toimage(res["monochrome"])
+      bbb.mirror(monochrome).show()
 
-    background = bbb.toimage(res["background"])
-    bbb.mirror(background).show()
+      background = bbb.toimage(res["background"])
+      bbb.mirror(background).show()
 
