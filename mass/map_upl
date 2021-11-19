@@ -1,0 +1,12 @@
+#!/bin/bash
+
+for f in $(find results/ -name '*.png'); do
+  # results/1529/0/0.json
+  echo $f
+  id=$(echo $f | sed -r 's/results\/([0-9]+)\/.+.png/\1/')
+  echo $id
+  map=$(basename $f | rev | cut -c 5- | rev)
+  echo $map
+  curl -XPOST "http://cwt-binary.normalnonoobs.com/api/game/$id/map/$map" -F "map=@${f}"
+done
+

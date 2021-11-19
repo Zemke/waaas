@@ -1,0 +1,20 @@
+#!/bin/bash
+
+echo 'begin;' > insert.sql
+echo >> insert.sql
+
+for f in $(find results/ -name '*.json'); do
+  # results/1529/0/0.json
+  echo $f
+  id=$(echo $f | sed -r 's/results\/([0-9]+)\/.+.json/\1/')
+  j=$(sed "s/'/''/g" < $f)
+  sa=$(jq .startedAt $f -r | rev | cut -c 5- | rev)
+  m=$(jq .map $f -r)
+  t=$(jq .texture $f -r)
+  echo "insert into game_stats (id, game_id, data, started_at, created, map, texture) \
+values (nextval('game_stats_id_seq'), $id, '$j', timestamp '$sa', now(), '$m', '$t');" >> insert.sql
+done
+
+echo 'commit;' >> insert.sql
+echo >> insert.sql
+

@@ -1,0 +1,10 @@
+#!/usr/bin/bash
+
+mkdir games16
+
+while IFS= read -r id
+do
+	wget -w 1 --random-wait --content-disposition  -P "replays16/" \
+      "http://cwt-binary.normalnonoobs.com/api/game/${id}/replay"
+done < games16.csv
+

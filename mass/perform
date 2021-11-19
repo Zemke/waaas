@@ -1,0 +1,20 @@
+#!/bin/bash
+
+for f in xtract/*; do
+  id=$(echo $f | grep -o '[0-9]*')
+  if [ ! -d "results/$id" ]; then
+    i=0
+    for r in $f/*; do
+      echo "$id $i"
+      mkdir -p "results/$id/$i"
+      curl -XPOST http://localhost:8080 -F "replay=@${r}" > "results/$id/$i/$i.json"
+      m=$(jq .map results/$id/$i/$i.json | sed 's/\/map\///g' | sed 's/"//g')
+      mv "/tmp/waaas_${m}_map" "results/$id/$i/${m}.png"
+      i=$((i+1))
+    done;
+  else
+    echo "$id already done"
+  fi;
+  echo "done $id"
+done;
+
