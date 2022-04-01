@@ -87,7 +87,9 @@ class index:
       <br/>
       <a target="_blank" href="https://github.com/zemke/waaas">GitHub</a>
       &bull;
-      <a target="_blank" href="https://hub.docker.com/r/zemke/docker-wa">Docker Hub</a>
+      <a target="_blank" href="https://github.com/zemke/wa-docker">Headless WA</a>
+      &bull;
+      <a target="_blank" href="https://worms2d.info/WAaaS">WKB</a>
       <br/>
       <hr/>
       <br/>
