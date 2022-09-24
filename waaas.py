@@ -151,6 +151,8 @@ def perform(lines):
       }
     elif " wins the round." in l:
       res["winsTheRound"] = re.compile("(.+) wins the round\.").search(l).group(1)
+    elif " wins the match!" in l:
+      res["winsTheMatch"] = re.compile("(.+) wins the match!").search(l).group(1)
     elif l.startswith("Worm of the round: "):
       # Worm name matching with asterisk rather than plus 'cause I've seen empty worm names.
       worm_of_the_round_search = re.compile("Worm of the round: (.*) \((.+)\)").search(l)
