@@ -19,7 +19,8 @@ logging.basicConfig(
 
 urls = (
   '/', 'index',
-  '/map/([^/]+)/?', 'map'
+  '/map/([^/]+)/?', 'map',
+  '/log/([^/]+)/?', 'log',
 )
 
 logging.info('starting up')
@@ -28,6 +29,11 @@ logging.info('starting up')
 class map:
   def GET(self, name):
     return open(gettempdir() + "/waaas_{0}_map".format(name), 'rb').read()
+
+
+class log:
+  def GET(self, name):
+    return open(gettempdir() + "/waaas_{0}_log".format(name), 'r', encoding="ISO-8859-1").read()
 
 
 class index:
@@ -42,9 +48,10 @@ class index:
     try:
       with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_replay") as replay_file:
         replay_file.write(inp['replay'])
-        with NamedTemporaryFile(mode='r+', prefix='waaas_', suffix="_log", encoding="ISO-8859-1") as log_file:
+        with NamedTemporaryFile(mode='r+', prefix='waaas_', suffix="_log", encoding="ISO-8859-1", delete=False) as log_file:
           web.running = True
           mapjson = None
+          logfilejson = None
           texturejson = None
           with TemporaryDirectory(prefix="waaas_", suffix="_land") as land_dir:
             os.system('./perform ' + land_dir + ' ' +  replay_file.name + ' ' + log_file.name)
@@ -57,12 +64,14 @@ class index:
                   mapjson = "/map/" + re.compile("/waaas_(.+)_map").search(map_file.name).group(1)
               except Exception as e:
                 logging.exception(e)
+          logfilejson = "/log/" + re.compile("/waaas_(.+)_log").search(log_file.name).group(1)
           web.header('Content-Type', 'application/json')
           if os.stat(log_file.name).st_size == 0:
             raise web.internalerror("could not process replay file")
           try:
             logjson = waaas.perform(log_file)
             logjson["map"] = mapjson
+            logjson["log"] = logfilejson
             logjson["texture"] = texturejson
             return json.dumps(logjson)
           except Exception as e:
