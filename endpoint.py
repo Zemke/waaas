@@ -104,7 +104,7 @@ class index:
       <br/>
       <form action="/" method="POST" target="_blank" enctype="multipart/form-data">
         <label for="replay">Replay</label>
-        <input type="file" id="replay" name="replay" accept="*.WAgame"/>
+        <input type="file" id="replay" name="replay" accept=".WAgame"/>
         <input type="submit" value="Submit" />
       </form>
     </body>
