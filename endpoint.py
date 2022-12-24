@@ -66,7 +66,7 @@ class index:
                     "cavernBorder": landres["cavernBorder"],
                     "height": landres["height"],
                     "length": landres["length"],
-                    "numOfStructures": landres["numOfStructures"],
+                    "objectPlacements": landres["objectPlacements"],
                     "waterHeight": landres["waterHeight"],
                     "width": landres["width"],
                     "texture": landres["texture"],
