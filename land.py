@@ -19,8 +19,10 @@ def perform(f):
     "quantity": struct.unpack('i', f.read(4)),
   }
   pl = []
-  for _ in range(res["numOfStructures"][0]):
-    pl.append((struct.unpack('i', f.read(4))[0], struct.unpack('i', f.read(4))[0]))
+  for _ in range(res["objectPlacements"]["quantity"][0]):
+    pl.append((
+      struct.unpack('i', f.read(4))[0],
+      struct.unpack('i', f.read(4))[0]))
   res["objectPlacements"]["coords"] = pl
   res["foreground"] = bbb.perform(f)
   res["monochrome"] = bbb.perform(f)
