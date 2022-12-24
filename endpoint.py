@@ -62,6 +62,16 @@ class index:
                   bbb.toimage(landres["foreground"]).save(map_file, format='PNG')
                   texturejson = landres["texture"]
                   mapjson = "/map/" + re.compile("/waaas_(.+)_map").search(map_file.name).group(1)
+                  mapextjson = {
+                    "cavernBorder": landres["cavernBorder"],
+                    "height": landres["height"],
+                    "length": landres["length"],
+                    "numOfStructures": landres["numOfStructures"],
+                    "waterHeight": landres["waterHeight"],
+                    "width": landres["width"],
+                    "texture": landres["texture"],
+                    "unknown": landres["unknown"],
+                  }
               except Exception as e:
                 logging.exception(e)
           logfilejson = "/log/" + re.compile("/waaas_(.+)_log").search(log_file.name).group(1)
@@ -72,6 +82,7 @@ class index:
             logjson = waaas.perform(log_file)
             logjson["map"] = mapjson
             logjson["log"] = logfilejson
+            logjson["mapData"] = mapextjson
             logjson["texture"] = texturejson
             return json.dumps(logjson)
           except Exception as e:
