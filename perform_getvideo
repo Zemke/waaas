@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker run -i --rm -v $7:/root/.wine/drive_c/WA/User/Capture/game wa:3 wa-getvideo $1 $2 $3 $4 $5 < $6
+

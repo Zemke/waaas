@@ -4,6 +4,8 @@ import re
 import json
 import logging
 import os
+from subprocess import Popen
+from pathlib import Path
 import time
 from tempfile import NamedTemporaryFile, TemporaryDirectory, gettempdir
 
@@ -13,6 +15,9 @@ import waaas
 import land
 import bbb
 
+DIR = pathlib.Path(__file__).parent.absolute()
+
+# TODO just log to stdout
 logging.basicConfig(
   filename='waaas.log', filemode='w', level=logging.DEBUG,
   format='%(asctime)s - %(levelname)s - %(message)s')
@@ -21,6 +26,7 @@ urls = (
   '/', 'index',
   '/map/([^/]+)/?', 'map',
   '/log/([^/]+)/?', 'log',
+  '/getvideo', 'getvideo',
 )
 
 logging.info('starting up')
@@ -34,6 +40,75 @@ class map:
 class log:
   def GET(self, name):
     return open(gettempdir() + "/waaas_{0}_log".format(name), 'r', encoding="ISO-8859-1").read()
+
+
+class getvideo:
+  def GET(self):
+    return "hello world"
+
+  def POST(self):
+    # TODO check x-getvideo token
+    # TODO check previous getvideo chunk has been acknowledged and disk space freed
+    # TODO frame limit due to limited disk space
+
+    # TODO same part as in index_POST
+    logging.info("somebody is taking advantage of me")
+    inp = web.input()
+    return inp
+    if "replay" not in inp:
+      raise web.badrequest('supply multipart form data with file in replay= format')
+    while web.running:
+      time.sleep(1)
+    logging.info("done waiting")
+    try:
+      with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_replay") as replay_file:
+        replay_file.write(inp['replay'])
+    # end of same part as in index_POST TODO
+
+        # validate fps
+        fps = 30
+        if 'fps' in inp:
+          if not inp['fps'].isdigit() or int(inp['fps']) < 1 or int(inp['fps']) > 60:
+            raise web.badrequest('fps must be an integer from 1 to 60')
+          fps = int(inp['fps'])
+
+        # validate x
+        x = 1920
+        if 'x' in inp:
+          if 'y' not in inp:
+            raise web.badrequest('x is provided but y is missing')
+          if not inp['x'].isdigit() or int(inp['x']) < 640 or int(inp['x']) > 1920:
+            raise web.badrequest('x must be an integer from 640 to 1920')
+          x = int(inp['x'])
+
+        # validate y
+        y = 1080
+        if 'y' in inp:
+          if 'x' not in inp:
+            raise web.badrequest('y is provided but x is missing')
+          if not inp['y'].isdigit() or int(inp['y']) < 640 or int(inp['y']) > 1080:
+            raise web.badrequest('y must be an integer from 480 to 1080')
+          y = int(inp['y'])
+
+        # validate start
+        start = 0
+        if 'start' in inp:
+          if not inp['start'].isdigit() or int(inp['start']) < 0 or int(inp['start']) > 3600
+            raise web.badrequest('start must be an integer from 0 to 3600')
+          start = int(inp['start'])
+
+        # validate end
+        end = 3600
+        if 'end' in inp:
+          if not inp['end'].isdigit() or int(inp['end']) < 1 or int(inp['end']) > 3600
+            raise web.badrequest('end must be an integer from 1 to 3600')
+          end = int(inp['end'])
+
+        params = ' '.join([fps, start, end, x, y])
+        getvideo_dir = TemporaryDirectory(prefix="waaas_", suffix="_getvideo")
+        Popen([os.path.join(DIR, 'perform_getvideo'), *params, replay_file.name, getvideo_dir])
+    finally:
+      web.running = False
 
 
 class index:
