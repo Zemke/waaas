@@ -54,7 +54,6 @@ class getvideo:
     # TODO same part as in index_POST
     logging.info("somebody is taking advantage of me")
     inp = web.input()
-    return inp
     if "replay" not in inp:
       raise web.badrequest('supply multipart form data with file in replay= format')
     while web.running:
@@ -104,8 +103,8 @@ class getvideo:
             raise web.badrequest('end must be an integer from 1 to 3600')
           end = int(inp['end'])
 
-        params = ' '.join([fps, start, end, x, y])
         getvideo_dir = TemporaryDirectory(prefix="waaas_", suffix="_getvideo")
+        params = [fps, start, end, x, y]
         Popen([os.path.join(DIR, 'perform_getvideo'), *params, replay_file.name, getvideo_dir])
     finally:
       web.running = False
