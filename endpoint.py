@@ -15,7 +15,7 @@ import waaas
 import land
 import bbb
 
-DIR = pathlib.Path(__file__).parent.absolute()
+DIR = Path(__file__).parent.absolute()
 
 # TODO just log to stdout
 logging.basicConfig(
