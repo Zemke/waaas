@@ -49,7 +49,6 @@ class getvideo:
   def POST(self):
     # TODO check x-getvideo token
     # TODO check previous getvideo chunk has been acknowledged and disk space freed
-    # TODO frame limit due to limited disk space
 
     # TODO same part as in index_POST
     logging.info("somebody is taking advantage of me")
@@ -65,14 +64,14 @@ class getvideo:
     # end of same part as in index_POST TODO
 
         # validate fps
-        fps = 30
+        fps = 20
         if 'fps' in inp:
-          if not inp['fps'].isdigit() or int(inp['fps']) < 1 or int(inp['fps']) > 60:
-            raise web.badrequest('fps must be an integer from 1 to 60')
+          if not inp['fps'].isdigit() or int(inp['fps']) < 1 or int(inp['fps']) > 30:
+            raise web.badrequest('fps must be an integer from 1 to 30')
           fps = int(inp['fps'])
 
         # validate x
-        x = 1920
+        x = 640
         if 'x' in inp:
           if 'y' not in inp:
             raise web.badrequest('x is provided but y is missing')
@@ -81,7 +80,7 @@ class getvideo:
           x = int(inp['x'])
 
         # validate y
-        y = 1080
+        y = 480
         if 'y' in inp:
           if 'x' not in inp:
             raise web.badrequest('y is provided but x is missing')
@@ -97,13 +96,15 @@ class getvideo:
           start = int(inp['start'])
 
         # validate end
-        end = 3600
+        end = 50
         if 'end' in inp:
           if not inp['end'].isdigit() or int(inp['end']) < 1 or int(inp['end']) > 3600
             raise web.badrequest('end must be an integer from 1 to 3600')
           end = int(inp['end'])
 
-        getvideo_dir = TemporaryDirectory(prefix="waaas_", suffix="_getvideo")
+        if end - start > 50:
+          raise web.badrequest('exported gameplay must not be longer than 50 soconds')
+
         params = [fps, start, end, x, y]
         Popen([os.path.join(DIR, 'perform_getvideo'), *params, replay_file.name, getvideo_dir])
     finally:
