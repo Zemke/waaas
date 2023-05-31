@@ -4,10 +4,14 @@ import re
 import json
 import logging
 import os
-from subprocess import Popen
-from pathlib import Path
 import time
+from subprocess import Popen
+
+
 from tempfile import NamedTemporaryFile, TemporaryDirectory, gettempdir
+import pickle
+from pathlib import Path
+import shutil
 
 import web
 
@@ -26,10 +30,19 @@ urls = (
   '/', 'index',
   '/map/([^/]+)/?', 'map',
   '/log/([^/]+)/?', 'log',
-  '/getvideo', 'getvideo',
+  '/getvideo/?([^/]+)?/?([^/]+)?/?', 'getvideo',
 )
 
 logging.info('starting up')
+
+
+def pid_running(pid):
+  try:
+    os.kill(pid, 0)
+  except OSError:
+    return False
+  else:
+    return True
 
 
 class map:
@@ -43,72 +56,135 @@ class log:
 
 
 class getvideo:
-  def GET(self):
-    return "hello world"
+  def GET(self, name, action):
+    if name is None or action is None:
+      raise web.notfound()
+    dest = os.path.join(gettempdir(), f"waaas_{name}_getvideo")
+    persist_f = os.path.join(DIR, 'persist', name + '.pickle')
+    if not os.path.exists(persist_f):
+      raise Exception('could not find persisted process ' + persist_f)
+    with open(persist_f, 'rb') as f:
+      persist = pickle.load(f)
+    if not os.path.exists(dest):
+      raise web.notfound('no such process')
+    if action == "status":
+      cnt = 0
+      for n in os.listdir(dest):
+        f = os.path.join(dest, n)
+        if os.path.isfile(f) and os.path.splitext(f)[-1].lower() == ".png":
+          cnt += 1
+      web.header('Content-Type', 'application/json')
+      return json.dumps(dict(
+        done=(done := pid_running(persist["pid"])),
+        ready=cnt,
+        expected=(expected := persist["expected"]),
+        progress=1. if done else round(cnt / persist["expected"], 2),
+        remaining=0 if done else (remaining := (expected - cnt)),
+        estimate_s=0 if done else round(cnt / (time.time() - persist["now"]) * remaining),
+        zero_indexed=True,
+      ))
+    elif action.isdigit():
+      f = os.path.join(
+        gettempdir(),
+        f"waaas_{name}_getvideo",
+        f"video_{action.rjust(6, '0')}.png")
+      if not os.path.exists(f):
+        raise web.notfound(f"file at position {action} does not exist")
+      web.header('Content-Type', 'image/x-png')
+      return open(f, 'rb').read()
+    elif action == "ack":
+      interrupt = pid_running(persist["pid"])
+      if interrupt:
+        os.kill(persist["pid"], 15)
+      logging.info("log from docker:")
+      #with open(log_f := os.path.join(DIR, 'persist', name + '.log'), 'r') as f:
+      #  logging.info(f.read())
+      web.header('Content-Type', 'application/json')
+      #os.remove(log_f)
+      print(dest)
+      shutil.rmtree(dest)
+      os.remove(persist_f)
+      return json.dumps(dict(interrupted=interrupt))
+    else:
+      raise web.notfound("no action for " + action)
 
-  def POST(self):
+  def POST(self, name, action):
     # TODO check x-getvideo token
     # TODO check previous getvideo chunk has been acknowledged and disk space freed
 
-    # TODO same part as in index_POST
     logging.info("somebody is taking advantage of me")
     inp = web.input()
     if "replay" not in inp:
       raise web.badrequest('supply multipart form data with file in replay= format')
-    while web.running:
-      time.sleep(1)
     logging.info("done waiting")
-    try:
-      with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_replay") as replay_file:
-        replay_file.write(inp['replay'])
-    # end of same part as in index_POST TODO
+    replay_file = NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_replay", delete=False)
+    replay_file.write(inp['replay'])
 
-        # validate fps
-        fps = 20
-        if 'fps' in inp:
-          if not inp['fps'].isdigit() or int(inp['fps']) < 1 or int(inp['fps']) > 30:
-            raise web.badrequest('fps must be an integer from 1 to 30')
-          fps = int(inp['fps'])
+    # validate fps
+    fps = 20
+    if 'fps' in inp:
+      if not inp['fps'].isdigit() or int(inp['fps']) < 1 or int(inp['fps']) > 30:
+        raise web.badrequest('fps must be an integer from 1 to 30')
+      fps = int(inp['fps'])
 
-        # validate x
-        x = 640
-        if 'x' in inp:
-          if 'y' not in inp:
-            raise web.badrequest('x is provided but y is missing')
-          if not inp['x'].isdigit() or int(inp['x']) < 640 or int(inp['x']) > 1920:
-            raise web.badrequest('x must be an integer from 640 to 1920')
-          x = int(inp['x'])
+    # validate x
+    x = 640
+    if 'x' in inp:
+      if 'y' not in inp:
+        raise web.badrequest('x is provided but y is missing')
+      if not inp['x'].isdigit() or int(inp['x']) < 640 or int(inp['x']) > 1920:
+        raise web.badrequest('x must be an integer from 640 to 1920')
+      x = int(inp['x'])
 
-        # validate y
-        y = 480
-        if 'y' in inp:
-          if 'x' not in inp:
-            raise web.badrequest('y is provided but x is missing')
-          if not inp['y'].isdigit() or int(inp['y']) < 640 or int(inp['y']) > 1080:
-            raise web.badrequest('y must be an integer from 480 to 1080')
-          y = int(inp['y'])
+    # validate y
+    y = 480
+    if 'y' in inp:
+      if 'x' not in inp:
+        raise web.badrequest('y is provided but x is missing')
+      if not inp['y'].isdigit() or int(inp['y']) < 640 or int(inp['y']) > 1080:
+        raise web.badrequest('y must be an integer from 480 to 1080')
+      y = int(inp['y'])
 
-        # validate start
-        start = 0
-        if 'start' in inp:
-          if not inp['start'].isdigit() or int(inp['start']) < 0 or int(inp['start']) > 3600
-            raise web.badrequest('start must be an integer from 0 to 3600')
-          start = int(inp['start'])
+    # validate start
+    start = 0
+    if 'start' in inp:
+      if not inp['start'].isdigit() or int(inp['start']) < 0 or int(inp['start']) > 3600:
+        raise web.badrequest('start must be an integer from 0 to 3600')
+      start = int(inp['start'])
 
-        # validate end
-        end = 50
-        if 'end' in inp:
-          if not inp['end'].isdigit() or int(inp['end']) < 1 or int(inp['end']) > 3600
-            raise web.badrequest('end must be an integer from 1 to 3600')
-          end = int(inp['end'])
+    # validate end
+    end = 50
+    if 'end' in inp:
+      if not inp['end'].isdigit() or int(inp['end']) < 1 or int(inp['end']) > 3600:
+        raise web.badrequest('end must be an integer from 1 to 3600')
+      end = int(inp['end'])
 
-        if end - start > 50:
-          raise web.badrequest('exported gameplay must not be longer than 50 soconds')
+    dur = end - start
+    if dur > 50:
+      raise web.badrequest('exported gameplay must not be longer than 50 soconds')
 
-        params = [fps, start, end, x, y]
-        Popen([os.path.join(DIR, 'perform_getvideo'), *params, replay_file.name, getvideo_dir])
-    finally:
-      web.running = False
+    params = dict(fps=fps, start=start, end=end, x=x, y=y)
+    tmpdir_opts = dict(prefix="waaas_", suffix="_getvideo")
+    getvideo_dir = TemporaryDirectory(**tmpdir_opts)
+    name = os.path.basename(getvideo_dir.name)[len(tmpdir_opts["prefix"]):-len(tmpdir_opts["suffix"])]
+    print([
+      os.path.join(DIR, 'perform_getvideo'),
+      *[str(p) for p in params.values()],
+      replay_file.name,
+      getvideo_dir.name,
+      os.path.join(DIR, 'persist', name + '.log'),
+    ])
+    proc = Popen([
+      os.path.join(DIR, 'perform_getvideo'),
+      *[str(p) for p in params.values()],
+      replay_file.name,
+      getvideo_dir.name,
+      os.path.join(DIR, 'persist', name + '.log'),
+    ])
+    web.header('Content-Type', 'text/plain')
+    with open(os.path.join(DIR, 'persist', name + '.pickle'), 'wb') as f:
+      pickle.dump(dict(**params, pid=proc.pid, expected=fps * dur, now=time.time()), f)
+    return name
 
 
 class index:
@@ -200,5 +276,6 @@ class index:
 
 if __name__ == "__main__":
   web.running = False
+  web.config.debug = os.getenv("DEBUG") == "1"
   app = web.application(urls, globals())
   app.run()
