@@ -5,10 +5,10 @@ import json
 import logging
 import os
 import time
-from subprocess import Popen
+import subprocess
 
 
-from tempfile import NamedTemporaryFile, TemporaryDirectory, gettempdir
+from tempfile import NamedTemporaryFile, TemporaryDirectory, gettempdir, mkdtemp
 import pickle
 from pathlib import Path
 import shutil
@@ -36,15 +36,6 @@ urls = (
 logging.info('starting up')
 
 
-def pid_running(pid):
-  try:
-    os.kill(pid, 0)
-  except OSError:
-    return False
-  else:
-    return True
-
-
 class map:
   def GET(self, name):
     return open(gettempdir() + "/waaas_{0}_map".format(name), 'rb').read()
@@ -53,6 +44,13 @@ class map:
 class log:
   def GET(self, name):
     return open(gettempdir() + "/waaas_{0}_log".format(name), 'r', encoding="ISO-8859-1").read()
+
+
+def container_valid(name):
+  return subprocess.run(
+    ["docker", "container", "inspect", name],
+    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+  ).returncode == 0
 
 
 class getvideo:
@@ -75,7 +73,7 @@ class getvideo:
           cnt += 1
       web.header('Content-Type', 'application/json')
       return json.dumps(dict(
-        done=(done := pid_running(persist["pid"])),
+        done=(done := not container_valid(name)),
         ready=cnt,
         expected=(expected := persist["expected"]),
         progress=1. if done else round(cnt / persist["expected"], 2),
@@ -93,16 +91,17 @@ class getvideo:
       web.header('Content-Type', 'image/x-png')
       return open(f, 'rb').read()
     elif action == "ack":
-      interrupt = pid_running(persist["pid"])
-      if interrupt:
-        os.kill(persist["pid"], 15)
+      kill = container_valid(name)
+      if kill:
+        subprocess.run(f"docker rm -f {name}")
       logging.info("log from docker:")
       with open(log_f := os.path.join(DIR, 'persist', name + '.log'), 'r') as f:
         logging.info(f.read())
       web.header('Content-Type', 'application/json')
       shutil.rmtree(dest)
       os.remove(persist_f)
-      return json.dumps(dict(interrupted=interrupt))
+      os.remove(log_f)
+      return json.dumps(dict(killed=kill))
     else:
       raise web.notfound("no action for " + action)
 
@@ -162,18 +161,19 @@ class getvideo:
 
     params = dict(fps=fps, start=start, end=end, x=x, y=y)
     tmpdir_opts = dict(prefix="waaas_", suffix="_getvideo")
-    getvideo_dir = TemporaryDirectory(**tmpdir_opts)
-    name = os.path.basename(getvideo_dir.name)[len(tmpdir_opts["prefix"]):-len(tmpdir_opts["suffix"])]
-    proc = Popen([
-      os.path.join(DIR, 'perform_getvideo'),
-      *[str(p) for p in params.values()],
-      replay_file.name,
-      getvideo_dir.name,
-      os.path.join(DIR, 'persist', name + '.log'),
-    ])
+    getvideo_dir = mkdtemp(**tmpdir_opts)
+    name = os.path.basename(getvideo_dir)[len(tmpdir_opts["prefix"]):-len(tmpdir_opts["suffix"])]
+    with open(os.path.join(DIR, 'persist', name + '.log'), 'w') as log_f:
+      proc = subprocess.Popen([
+        os.path.join(DIR, 'perform_getvideo'),
+        *[str(p) for p in params.values()],
+        replay_file.name,
+        getvideo_dir,
+        name,
+      ], stdout=log_f, stderr=log_f)
     web.header('Content-Type', 'text/plain')
     with open(os.path.join(DIR, 'persist', name + '.pickle'), 'wb') as f:
-      pickle.dump(dict(**params, pid=proc.pid, expected=fps * dur, now=time.time()), f)
+      pickle.dump(dict(**params, expected=fps * dur, now=time.time()), f)
     return name
 
 

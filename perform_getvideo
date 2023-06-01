@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 # TODO timeout
-docker run -i --rm -v $7:/root/.wine/drive_c/WA/User/Capture/game wa:4 wa-getvideo $1 $2 $3 $4 $5 < $6 > $8 2>&1
+docker run -i --rm --name $8 -v $7:/root/.wine/drive_c/WA/User/Capture/game wa:4 wa-getvideo $1 $2 $3 $4 $5 < $6
 
