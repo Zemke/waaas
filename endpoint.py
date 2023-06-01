@@ -195,6 +195,8 @@ class index:
           logfilejson = None
           texturejson = None
           with TemporaryDirectory(prefix="waaas_", suffix="_land") as land_dir:
+            # TODO timeout
+            # TODO use subprocess
             os.system('./perform ' + land_dir + ' ' +  replay_file.name + ' ' + log_file.name)
             with open(land_dir + "/land.dat", mode='rb') as land_file:
               try:
