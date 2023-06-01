@@ -97,11 +97,9 @@ class getvideo:
       if interrupt:
         os.kill(persist["pid"], 15)
       logging.info("log from docker:")
-      #with open(log_f := os.path.join(DIR, 'persist', name + '.log'), 'r') as f:
-      #  logging.info(f.read())
+      with open(log_f := os.path.join(DIR, 'persist', name + '.log'), 'r') as f:
+        logging.info(f.read())
       web.header('Content-Type', 'application/json')
-      #os.remove(log_f)
-      print(dest)
       shutil.rmtree(dest)
       os.remove(persist_f)
       return json.dumps(dict(interrupted=interrupt))
@@ -110,7 +108,6 @@ class getvideo:
 
   def POST(self, name, action):
     # TODO check x-getvideo token
-    # TODO check previous getvideo chunk has been acknowledged and disk space freed
 
     logging.info("somebody is taking advantage of me")
     inp = web.input()
@@ -167,13 +164,6 @@ class getvideo:
     tmpdir_opts = dict(prefix="waaas_", suffix="_getvideo")
     getvideo_dir = TemporaryDirectory(**tmpdir_opts)
     name = os.path.basename(getvideo_dir.name)[len(tmpdir_opts["prefix"]):-len(tmpdir_opts["suffix"])]
-    print([
-      os.path.join(DIR, 'perform_getvideo'),
-      *[str(p) for p in params.values()],
-      replay_file.name,
-      getvideo_dir.name,
-      os.path.join(DIR, 'persist', name + '.log'),
-    ])
     proc = Popen([
       os.path.join(DIR, 'perform_getvideo'),
       *[str(p) for p in params.values()],
