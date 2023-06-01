@@ -21,7 +21,6 @@ import bbb
 
 DIR = Path(__file__).parent.absolute()
 
-# TODO just log to stdout
 logging.basicConfig(
   level=logging.DEBUG,
   format='%(asctime)s - %(levelname)s - %(message)s')
