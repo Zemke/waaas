@@ -90,8 +90,7 @@ class getvideo:
       web.header('Content-Type', 'image/x-png')
       return open(f, 'rb').read()
     elif action == "ack":
-      kill = container_valid(name)
-      if kill:
+      if kill := container_valid(name):
         subprocess.run(f"docker rm -f {name}")
       logging.info("log from docker:")
       with open(log_f := os.path.join(DIR, 'persist', name + '.log'), 'r') as f:
