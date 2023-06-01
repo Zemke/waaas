@@ -23,7 +23,7 @@ DIR = Path(__file__).parent.absolute()
 
 # TODO just log to stdout
 logging.basicConfig(
-  filename='waaas.log', filemode='w', level=logging.DEBUG,
+  level=logging.DEBUG,
   format='%(asctime)s - %(levelname)s - %(message)s')
 
 urls = (
