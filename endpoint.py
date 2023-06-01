@@ -80,7 +80,7 @@ class getvideo:
         expected=(expected := persist["expected"]),
         progress=1. if done else round(cnt / persist["expected"], 2),
         remaining=0 if done else (remaining := (expected - cnt)),
-        estimate_s=0 if done else round(cnt / (time.time() - persist["now"]) * remaining),
+        estimate_s=0 if done else round((time.time() - persist["now"]) / cnt * remaining),
         zero_indexed=True,
       ))
     elif action.isdigit():
