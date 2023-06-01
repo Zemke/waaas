@@ -97,6 +97,7 @@ class getvideo:
       with open(log_f := os.path.join(DIR, 'persist', name + '.log'), 'r') as f:
         logging.info(f.read())
       web.header('Content-Type', 'application/json')
+      # TODO removals are optional (log warning)
       shutil.rmtree(dest)
       os.remove(persist_f)
       os.remove(log_f)
@@ -106,6 +107,7 @@ class getvideo:
 
   def POST(self, name, action):
     # TODO check x-getvideo token
+    # TODO make sure previous process has been acknowledged
 
     logging.info("somebody is taking advantage of me")
     inp = web.input()
@@ -264,7 +266,7 @@ class index:
 
 
 if __name__ == "__main__":
-  web.running = False
+  web.running = False  # TODO better to check if container is still running (i.e. all containers started here are named waaas)
   web.config.debug = os.getenv("DEBUG") == "1"
   app = web.application(urls, globals())
   app.run()
