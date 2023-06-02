@@ -107,7 +107,8 @@ class getvideo:
   def POST(self, name, action):
     if os.getenv("WAAAS_GETVIDEO_TOKEN") != web.ctx.env.get("HTTP_X_GETVIDEO"):
       raise web.forbidden("getvideo endpoint is restricted")
-
+    while container_valid():
+      time.sleep(1)
     logging.info("somebody is taking advantage of me")
     inp = web.input()
     if "replay" not in inp:
