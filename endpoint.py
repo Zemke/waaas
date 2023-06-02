@@ -105,8 +105,6 @@ class getvideo:
       raise web.notfound("no action for " + action)
 
   def POST(self, name, action):
-    # TODO make sure previous process has been acknowledged
-
     if os.getenv("WAAAS_GETVIDEO_TOKEN") != web.ctx.env.get("HTTP_X_GETVIDEO"):
       raise web.forbidden("getvideo endpoint is restricted")
 
