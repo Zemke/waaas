@@ -96,7 +96,6 @@ class getvideo:
       with open(log_f := os.path.join(DIR, 'persist', name + '.log'), 'r') as f:
         logging.info(f.read())
       web.header('Content-Type', 'application/json')
-      # TODO removals are optional (log warning)
       shutil.rmtree(dest)
       os.remove(persist_f)
       os.remove(log_f)
