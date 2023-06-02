@@ -163,7 +163,7 @@ class getvideo:
     tmpdir_opts = dict(prefix="waaas_", suffix="_getvideo")
     getvideo_dir = mkdtemp(**tmpdir_opts)
     name = os.path.basename(getvideo_dir)[len(tmpdir_opts["prefix"]):-len(tmpdir_opts["suffix"])]
-    logging.info("getvideo " + ' '.join(params.values())
+    logging.info("getvideo " + ' '.join(params.values()))
     with open(os.path.join(DIR, 'persist', name + '.log'), 'w') as log_f:
       proc = subprocess.Popen([
         os.path.join(DIR, 'perform_getvideo'),
