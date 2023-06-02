@@ -56,6 +56,8 @@ class getvideo:
   def GET(self, name, action):
     if name is None or action is None:
       raise web.notfound()
+    if re.match("^[0-9A-Za-z_-]+$", s) is None:
+      raise web.badrequest("invalid name")
     dest = os.path.join(gettempdir(), f"waaas_{name}_getvideo")
     persist_f = os.path.join(DIR, 'persist', name + '.pickle')
     if not os.path.exists(persist_f):
