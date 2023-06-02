@@ -45,9 +45,9 @@ class log:
     return open(gettempdir() + "/waaas_{0}_log".format(name), 'r', encoding="ISO-8859-1").read()
 
 
-def container_valid(name):
+def container_valid():
   return subprocess.run(
-    ["docker", "container", "inspect", name],
+    ["docker", "container", "inspect", "waaas"],
     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
   ).returncode == 0
 
@@ -72,7 +72,7 @@ class getvideo:
           cnt += 1
       web.header('Content-Type', 'application/json')
       return json.dumps(dict(
-        done=(done := not container_valid(name)),
+        done=(done := not container_valid()),
         ready=cnt,
         expected=(expected := persist["expected"]),
         progress=1. if done else round(cnt / persist["expected"], 2),
@@ -90,7 +90,7 @@ class getvideo:
       web.header('Content-Type', 'image/x-png')
       return open(f, 'rb').read()
     elif action == "ack":
-      if kill := container_valid(name):
+      if kill := container_valid():
         logging.info("killing container")
         subprocess.run(f"docker rm -f {name}")
       logging.info("log from docker:")
@@ -184,56 +184,52 @@ class index:
     inp = web.input()
     if "replay" not in inp:
       raise web.badrequest('supply multipart form data with file in replay= format')
-    while web.running:
+    while container_valid():
       time.sleep(1)
     logging.info("done waiting")
-    try:
-      with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_replay") as replay_file:
-        replay_file.write(inp['replay'])
-        with NamedTemporaryFile(mode='r+', prefix='waaas_', suffix="_log", encoding="ISO-8859-1", delete=False) as log_file:
-          web.running = True
-          mapjson = None
-          logfilejson = None
-          texturejson = None
-          with TemporaryDirectory(prefix="waaas_", suffix="_land") as land_dir:
-            # TODO timeout
-            # TODO use subprocess
-            os.system('./perform ' + land_dir + ' ' +  replay_file.name + ' ' + log_file.name)
-            with open(land_dir + "/land.dat", mode='rb') as land_file:
-              try:
-                with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_map", delete=False) as map_file:
-                  landres = land.perform(land_file)
-                  bbb.toimage(landres["foreground"]).save(map_file, format='PNG')
-                  texturejson = landres["texture"]
-                  mapjson = "/map/" + re.compile("/waaas_(.+)_map").search(map_file.name).group(1)
-                  mapextjson = {
-                    "cavernBorder": landres["cavernBorder"],
-                    "height": landres["height"],
-                    "length": landres["length"],
-                    "objectPlacements": landres["objectPlacements"],
-                    "waterHeight": landres["waterHeight"],
-                    "width": landres["width"],
-                    "texture": landres["texture"],
-                    "unknown": landres["unknown"],
-                  }
-              except Exception as e:
-                logging.exception(e)
-          logfilejson = "/log/" + re.compile("/waaas_(.+)_log").search(log_file.name).group(1)
-          web.header('Content-Type', 'application/json')
-          if os.stat(log_file.name).st_size == 0:
-            raise web.internalerror("could not process replay file")
-          try:
-            logjson = waaas.perform(log_file)
-            logjson["map"] = mapjson
-            logjson["log"] = logfilejson
-            logjson["mapData"] = mapextjson
-            logjson["texture"] = texturejson
-            return json.dumps(logjson)
-          except Exception as e:
-            logging.exception(e)
-            raise web.internalerror("error while processing the replay file")
-    finally:
-      web.running = False
+    with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_replay") as replay_file:
+      replay_file.write(inp['replay'])
+      with NamedTemporaryFile(mode='r+', prefix='waaas_', suffix="_log", encoding="ISO-8859-1", delete=False) as log_file:
+        mapjson = None
+        logfilejson = None
+        texturejson = None
+        with TemporaryDirectory(prefix="waaas_", suffix="_land") as land_dir:
+          # TODO timeout
+          # TODO use subprocess
+          os.system('./perform ' + land_dir + ' ' +  replay_file.name + ' ' + log_file.name)
+          with open(land_dir + "/land.dat", mode='rb') as land_file:
+            try:
+              with NamedTemporaryFile(mode='wb', prefix='waaas_', suffix="_map", delete=False) as map_file:
+                landres = land.perform(land_file)
+                bbb.toimage(landres["foreground"]).save(map_file, format='PNG')
+                texturejson = landres["texture"]
+                mapjson = "/map/" + re.compile("/waaas_(.+)_map").search(map_file.name).group(1)
+                mapextjson = {
+                  "cavernBorder": landres["cavernBorder"],
+                  "height": landres["height"],
+                  "length": landres["length"],
+                  "objectPlacements": landres["objectPlacements"],
+                  "waterHeight": landres["waterHeight"],
+                  "width": landres["width"],
+                  "texture": landres["texture"],
+                  "unknown": landres["unknown"],
+                }
+            except Exception as e:
+              logging.exception(e)
+        logfilejson = "/log/" + re.compile("/waaas_(.+)_log").search(log_file.name).group(1)
+        web.header('Content-Type', 'application/json')
+        if os.stat(log_file.name).st_size == 0:
+          raise web.internalerror("could not process replay file")
+        try:
+          logjson = waaas.perform(log_file)
+          logjson["map"] = mapjson
+          logjson["log"] = logfilejson
+          logjson["mapData"] = mapextjson
+          logjson["texture"] = texturejson
+          return json.dumps(logjson)
+        except Exception as e:
+          logging.exception(e)
+          raise web.internalerror("error while processing the replay file")
   
   def GET(self):
     return """
@@ -268,7 +264,6 @@ class index:
 
 
 if __name__ == "__main__":
-  web.running = False  # TODO better to check if container is still running (i.e. all containers started here are named waaas)
   web.config.debug = os.getenv("DEBUG") == "1"
   app = web.application(urls, globals())
   app.run()

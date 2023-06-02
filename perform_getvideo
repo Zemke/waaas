@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-timeout 20 docker run -i --rm --name $8 -v $7:/root/.wine/drive_c/WA/User/Capture/game wa:4 wa-getvideo $1 $2 $3 $4 $5 < $6
+timeout 20 docker run -i --rm --name waaas -v $7:/root/.wine/drive_c/WA/User/Capture/game wa:4 wa-getvideo $1 $2 $3 $4 $5 < $6
 
