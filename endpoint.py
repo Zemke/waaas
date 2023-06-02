@@ -76,7 +76,7 @@ class getvideo:
         ready=cnt,
         expected=(expected := persist["expected"]),
         progress=1. if done else round(cnt / persist["expected"], 2),
-        remaining=0 if done else (remaining := (expected - cnt)),
+        remaining=0 if done else (remaining := max(0, (expected - cnt))),
         estimate_s=0 if done else round((time.time() - persist["now"]) / cnt * remaining),
         zero_indexed=True,
       ))
