@@ -19,6 +19,10 @@ import waaas
 import land
 import bbb
 
+class Bunch:
+  def __init__(self, **kwds):
+    self.__dict__.update(kwds)
+
 DIR = Path(__file__).parent.absolute()
 
 logging.basicConfig(
@@ -109,6 +113,8 @@ class getvideo:
   def POST(self, name, action):
     if os.getenv("WAAAS_GETVIDEO_TOKEN") != web.ctx.env.get("HTTP_X_GETVIDEO"):
       raise web.forbidden("getvideo endpoint is restricted")
+    if name is not None or action is not None:
+      raise web.nomethod(cls=Bunch(GET=True))
     while container_valid():
       time.sleep(1)
     logging.info("somebody is taking advantage of me")
