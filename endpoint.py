@@ -184,7 +184,7 @@ class getvideo:
     web.header('Content-Type', 'text/plain')
     with open(os.path.join(DIR, 'persist', name + '.pickle'), 'wb') as f:
       pickle.dump(dict(**params, expected=fps * dur, now=time.time()), f)
-    logger.info("getvideo " + name)
+    logging.info("getvideo " + name)
     return name
 
 
