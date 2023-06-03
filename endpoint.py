@@ -111,6 +111,7 @@ class getvideo:
       raise web.notfound("no action for " + action)
 
   def POST(self, name, action):
+    inp = web.input()
     if os.getenv("WAAAS_GETVIDEO_TOKEN") != web.ctx.env.get("HTTP_X_GETVIDEO"):
       raise web.forbidden("getvideo endpoint is restricted")
     if name is not None or action is not None:
@@ -118,7 +119,6 @@ class getvideo:
     while container_valid():
       time.sleep(1)
     logging.info("somebody is taking advantage of me")
-    inp = web.input()
     if "replay" not in inp:
       raise web.badrequest('supply multipart form data with file in replay= format')
     logging.info("done waiting")
