@@ -65,7 +65,7 @@ class getvideo:
     dest = os.path.join(gettempdir(), f"waaas_{name}_getvideo")
     persist_f = os.path.join(DIR, 'persist', name + '.pickle')
     if not os.path.exists(persist_f):
-      raise Exception('could not find persisted process ' + persist_f)
+      raise web.notfound("no such persisted process " + name)
     with open(persist_f, 'rb') as f:
       persist = pickle.load(f)
     if not os.path.exists(dest):
