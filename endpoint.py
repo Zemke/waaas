@@ -98,7 +98,7 @@ class getvideo:
     elif action == "ack":
       if kill := container_valid():
         logging.info("killing container")
-        subprocess.run(f"docker rm -f {name}")
+        subprocess.run(["docker", "rm", "-f", name])
       logging.info("log from docker:")
       with open(log_f := os.path.join(DIR, 'persist', name + '.log'), 'r') as f:
         logging.info(f.read())
