@@ -148,19 +148,21 @@ class getvideo:
         raise web.badrequest('y must be an integer from 480 to 1080')
       y = int(inp['y'])
 
-    # validate start
-    start = 0
-    if 'start' in inp:
-      if not inp['start'].isdigit() or int(inp['start']) < 0 or int(inp['start']) > 3600:
-        raise web.badrequest('start must be an integer from 0 to 3600')
-      start = int(inp['start'])
+    # validate start and end
+    tt = [0, 0]
+    for i, t in enumerate(('start', 'end')):
+      if t in inp:
+        if re.match("^(?:\d\d:){2}\d\d\.\d\d$", inp[t]):
+          h, m, s = [float(n) for n in inp[t].split(':')]
+          tt[i] = h * 60 * 60 + m * 60 + s
+        elif re.match("\d+(:?\.\d\d)?$", inp[t]):
+          tt[i] = float(inp[t])
+        else:
+          raise web.badrequest(t + ' must be a number of seconds or timestamp in format 00:24:04.76')
+    start, end = tt
 
-    # validate end
-    end = 50
-    if 'end' in inp:
-      if not inp['end'].isdigit() or int(inp['end']) < 1 or int(inp['end']) > 3600:
-        raise web.badrequest('end must be an integer from 1 to 3600')
-      end = int(inp['end'])
+    if start > end:
+      raise web.badrequest('start is after end')
 
     dur = end - start
     if dur > 50:
