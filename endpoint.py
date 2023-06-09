@@ -36,8 +36,6 @@ urls = (
   '/getvideo/?([^/]+)?/?([^/]+)?/?', 'getvideo',
 )
 
-logging.info('starting up')
-
 
 class map:
   def GET(self, name):
