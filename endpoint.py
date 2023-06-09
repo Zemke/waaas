@@ -146,7 +146,7 @@ class getvideo:
     if 'y' in inp:
       if 'x' not in inp:
         raise web.badrequest('y is provided but x is missing')
-      if not inp['y'].isdigit() or int(inp['y']) < 640 or int(inp['y']) > 1080:
+      if not inp['y'].isdigit() or int(inp['y']) < 480 or int(inp['y']) > 1080:
         raise web.badrequest('y must be an integer from 480 to 1080')
       y = int(inp['y'])
 
