@@ -126,8 +126,8 @@ class getvideo:
     # validate fps
     fps = 20
     if 'fps' in inp:
-      if not inp['fps'].isdigit() or int(inp['fps']) < 1 or int(inp['fps']) > 30:
-        raise web.badrequest('fps must be an integer from 1 to 30')
+      if not inp['fps'].isdigit() or int(inp['fps']) < 1 or int(inp['fps']) > 50:
+        raise web.badrequest('fps must be an integer from 1 to 50')
       fps = int(inp['fps'])
 
     # validate x
